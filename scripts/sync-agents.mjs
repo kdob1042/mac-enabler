@@ -28,8 +28,8 @@ function mergeManagedBlock(existing, block) {
 
   const suffix = existing.trimEnd();
   return suffix
-    ? suffix + '\\n\\n' + normalizedBlock + '\\n'
-    : normalizedBlock + '\\n';
+    ? suffix + '\n\n' + normalizedBlock + '\n'
+    : normalizedBlock + '\n';
 }
 
 async function buildSnapshot() {
@@ -47,7 +47,7 @@ async function buildSnapshot() {
       '.codex/mac-enabler/workflow.json',
       '.codex/mac-enabler/compact-protocol.md'
     ]
-  }, null, 2) + '\\n';
+  }, null, 2) + '\n';
 
   return {
     'AGENTS.md': block,

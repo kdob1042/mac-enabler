@@ -10,7 +10,7 @@ test('sync preserves existing AGENTS content and is idempotent', async () => {
   try {
     await writeFile(
       path.join(target, 'AGENTS.md'),
-      '# Project rules\\n\\nKeep project-specific facts here.\\n',
+      '# Project rules\n\nKeep project-specific facts here.\n',
       'utf8'
     );
 

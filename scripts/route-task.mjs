@@ -10,7 +10,7 @@ export async function loadRoutingConfig() {
 }
 
 function normalize(value) {
-  return String(value).toLocaleLowerCase('ja-JP').replace(/\\s+/g, ' ').trim();
+  return String(value).toLocaleLowerCase('ja-JP').replace(/\s+/g, ' ').trim();
 }
 
 function matches(task, terms) {
@@ -98,7 +98,7 @@ async function main() {
   const config = await loadRoutingConfig();
   if (args.includes('--list')) {
     for (const route of config.routes) {
-      console.log(route.id + '\\t' + route.profile);
+      console.log(route.id + '\t' + route.profile);
     }
     return;
   }
