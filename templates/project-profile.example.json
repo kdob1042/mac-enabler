@@ -1,0 +1,17 @@
+{
+  "repository": "owner/name",
+  "default_branch": "main",
+  "work_base_branch": "main",
+  "source_of_truth": [
+    "GitHub"
+  ],
+  "agent_files": [
+    "AGENTS.md"
+  ],
+  "validation": {
+    "commands": [
+      "npm test"
+    ],
+    "notes": "Replace this file with project-specific facts in the target repository."
+  }
+}

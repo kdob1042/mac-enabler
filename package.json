@@ -1,0 +1,11 @@
+{
+  "name": "mac-enabler",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "route": "node scripts/route-task.mjs",
+    "sync": "node scripts/sync-agents.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test"
+  }
+}
