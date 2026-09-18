@@ -32,30 +32,8 @@ function mergeManagedBlock(existing, block) {
     : normalizedBlock + '\n';
 }
 
-async function buildSnapshot() {
-  const routing = await readText(path.join(ROOT, 'config', 'model-routing.json'));
-  const workflow = await readText(path.join(ROOT, 'config', 'workflow.json'));
-  const compact = await readText(path.join(ROOT, 'docs', 'compact-protocol.md'));
-  const block = await readText(path.join(ROOT, 'templates', 'shared-agents-block.md'));
-
-  const manifest = JSON.stringify({
-    source: 'kdob1042/mac-enabler',
-    version: 1,
-    managed_paths: [
-      'AGENTS.md managed block',
-      '.codex/mac-enabler/model-routing.json',
-      '.codex/mac-enabler/workflow.json',
-      '.codex/mac-enabler/compact-protocol.md'
-    ]
-  }, null, 2) + '\n';
-
-  return {
-    'AGENTS.md': block,
-    '.codex/mac-enabler/manifest.json': manifest,
-    '.codex/mac-enabler/model-routing.json': routing,
-    '.codex/mac-enabler/workflow.json': workflow,
-    '.codex/mac-enabler/compact-protocol.md': compact
-  };
+async function buildManagedBlock() {
+  return readText(path.join(ROOT, 'templates', 'shared-agents-block.md'));
 }
 
 export async function syncTarget(targetArg, options = {}) {
@@ -64,11 +42,10 @@ export async function syncTarget(targetArg, options = {}) {
   const targetStat = await stat(target);
   if (!targetStat.isDirectory()) throw new Error('Target must be a directory: ' + target);
 
-  const snapshot = await buildSnapshot();
+  const block = await buildManagedBlock();
   const currentAgents = await readText(path.join(target, 'AGENTS.md'));
   const expected = {
-    ...snapshot,
-    'AGENTS.md': mergeManagedBlock(currentAgents, snapshot['AGENTS.md'])
+    'AGENTS.md': mergeManagedBlock(currentAgents, block)
   };
 
   const changes = [];
