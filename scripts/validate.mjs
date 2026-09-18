@@ -22,6 +22,10 @@ assert(routing.version === 1, 'Unexpected routing version.');
 assert(workflow.version === 1, 'Unexpected workflow version.');
 assert(routing.profiles.astra_light && routing.profiles.luna_max, 'Both Astra Light and Luna Max profiles are required.');
 assert(!routing.profiles.cheap && !routing.profiles.balanced && !routing.profiles.strong && !routing.profiles.max, 'Legacy capability profiles must be removed.');
+assert(routing.phase_profiles.source_analysis === 'luna_max', 'Source analysis must use Luna Max.');
+assert(routing.phase_profiles.implementation === 'luna_max', 'Simple implementation must default to Luna Max.');
+assert(routing.bindings.astra_light.reasoning_effort === 'xhigh', 'Difficult work must use Astra Light at maximum reasoning.');
+assert(routing.bindings.luna_max.reasoning_effort === 'low', 'Routine work must use Luna Max at low reasoning.');
 assert(workflow.phases.find((phase) => phase.id === 'classify')?.required === false, 'Classification must be conditional.');
 assert(workflow.phases.find((phase) => phase.id === 'handoff')?.required === false, 'Handoff must be conditional.');
 assert(syncTargets.version === 1, 'Unexpected sync target version.');
@@ -53,9 +57,9 @@ assert(routing.bindings.astra_light.cli_profile === 'astra_light', 'Astra Light 
 assert(routing.bindings.luna_max.cli_profile === 'luna_max', 'Luna Max binding failed.');
 
 const architecture = routeTask('全体設計を見直して実装方針を決める', routing);
-assert(architecture.route === 'architecture' && architecture.profile === 'luna_max', 'Architecture route failed.');
+assert(architecture.route === 'architecture' && architecture.profile === 'astra_light', 'Architecture route failed.');
 
 const dangerous = routeTask('本番データを削除する移行を実装する', routing);
-assert(dangerous.profile === 'luna_max', 'Guardrail elevation failed.');
+assert(dangerous.profile === 'astra_light', 'Guardrail elevation failed.');
 
 console.log('mac-enabler validation passed.');
