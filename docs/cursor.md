@@ -46,6 +46,7 @@ npm run cursor:project -- --check --target ../target-repository
 ```
 
 `--install-command` はCloud Buildごとに再実行されるため冪等にする。Secretsをコマンド文字列へ埋め込まず、Cursor Cloud Secretsまたは環境変数を参照する。
+引数なしの `--check` はファイルの存在・形式・管理ブロックを検査する。コマンド値まで照合したい場合は、導入時に渡した `--install-command`、`--test-command`、任意の `--start-command`／`--terminal` を同じ値で指定する。
 
 ## Projects／Cloud Agentsで手動設定すること
 

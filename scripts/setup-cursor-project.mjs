@@ -224,8 +224,16 @@ function hasManagedBlock(text) {
   return start >= 0 && markerEnd >= 0 && markerEnd > start;
 }
 
+function stable(value) {
+  if (Array.isArray(value)) return value.map(stable);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, stable(value[key])]));
+  }
+  return value;
+}
+
 function sameJson(left, right) {
-  return JSON.stringify(left) === JSON.stringify(right);
+  return JSON.stringify(stable(left)) === JSON.stringify(stable(right));
 }
 
 function backupName(filePath) {

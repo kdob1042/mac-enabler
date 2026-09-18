@@ -48,6 +48,18 @@ npm run cursor:setup -- --check
 
 Cursor公式のプロジェクト規約入口は各repoの `AGENTS.md` です。共通規約のrepo配布はPR #3の短い管理ブロックに限定します。
 
+Cursor Projects／Cloud Agentsのrepo固有設定は、対象repoを明示して次の補助を使えます。依存インストールとテストのコマンドは対象repoの正本を確認してから指定してください。
+
+```bash
+npm run cursor:project -- --install \
+  --target ../manga-mac \
+  --install-command "npm ci" \
+  --test-command "npm test"
+npm run cursor:project -- --check --target ../manga-mac
+```
+
+生成するのは `.cursor/environment.json` と `AGENTS.md` の専用ブロックだけです。ProjectsのGitHub接続、Secrets、coordinator、購読、hooksの実行方針は対象repoとCursor側で手動設定します。詳細は [`cursor.md`](cursor.md) と [`agent-workflow.md`](agent-workflow.md) を参照してください。
+
 ## ローカルrepo
 
 兄弟repoへ共通ブロックを適用する必要がある場合だけ実行します。
