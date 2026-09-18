@@ -23,6 +23,8 @@ npm run codex:setup -- --install
 
 通常は `luna_max` で既存ソースを解析して変更箇所を特定し、コンパクション後に難しい設計・実装だけ `astra_light` へ切り替えます。簡単な実装はそのまま `luna_max` で進めます。
 
+ここでいう切り替えは、ユーザーまたは外側のランチャーが `codex --profile luna_max`／`codex --profile astra_light` で新しいCLIプロセスを起動することを指します。実行中のCodexが自分自身のモデルを後から切り替えるものではありません。ルーターは選択方針と `codex_profile` を示し、起動操作はCLI側で行います。
+
 開発対象repoは別にcloneして使います。mac-enablerの兄弟ディレクトリや、中央repoの詳細設定を対象repoから読む必要はありません。
 
 ## ローカルrepo
