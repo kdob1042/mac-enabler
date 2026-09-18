@@ -1,70 +1,70 @@
 # 対象リポジトリへの統合
 
-## 責務分担
+## 結論
 
-`mac-enabler`を共通Codex運用設定の中央正本とし、`dev-template`はIssue／PR／Project自動化を含む新規リポジトリ用テンプレートとして残します。
+すべてのrepoへ中央設定を同期しません。
 
-- mac-enabler：共通のルーティング、workflow、compact、AGENTS統合、配布・同期
-- dev-template：新規repoへコピーするGitHub自動化、Issueテンプレート、Project運用
-- 各プロジェクトrepo：固有の設計、ブランチ、テスト、データ正本
+- Codex本体の設定、モデルプロファイル、共通Skillは利用端末またはプラグイン側で管理する
+- プロジェクト固有の設定は各repoで管理する
+- Cloud Agentなどがrepo内で必ず読む必要がある場合だけ、短い `AGENTS.md` 管理ブロックを同期する
+- `dev-template` は新規repo用テンプレートなので、共通ブロックの更新対象にする
 
-`dev-template`の自動化ロジックを`mac-enabler`へ複製しません。`dev-template`自体をmac-enablerの同期対象に含め、両者を一つの運用体系として更新します。
+`mac-enabler`を置いただけでは、別repoのエージェントはその内容を自動的には継承しません。逆に、中央の `model-routing.json`、`workflow.json`、コンパクション文書を各repoへコピーしても、設定の自動適用やモデル切替にはなりません。
 
 ## ローカル
 
-兄弟リポジトリとして配置します。
+兄弟repoへ共通ブロックを適用する必要がある場合だけ実行します。
 
 ```text
 github/
 ├── mac-enabler/
 ├── dev-template/
 ├── manga-mac/
-├── live-manga/
-└── nexus/
+└── その他のプロジェクトrepo
 ```
-
-mac-enablerから対象へ同期します。
 
 ```bash
 node scripts/sync-agents.mjs --target ../manga-mac
 ```
 
-同期後、対象リポジトリ側で差分を確認し、対象リポジトリの通常ルールに従ってブランチとPRを作ります。
+この操作で更新されるのは対象ルートの `AGENTS.md` にある `MAC-ENABLER` 管理ブロックだけです。
 
 ## 自動同期
 
-`.github/sync-targets.json`に対象repo、ベースブランチ、同期ブランチを登録します。
+`.github/sync-targets.json` は、共通ブロックの同期が必要なrepoだけを明示する許可リストです。
 
-`mac-enabler`の`main`へ共通設定をマージすると、`.github/workflows/sync-targets.yml`が対象repoごとに次を行います。
+Workflowは対象repoごとに次を行います。
 
-1. 対象repoの指定ベースブランチをclone
-2. 管理ブロックと`.codex/mac-enabler/`を更新
+1. 指定ベースブランチをclone
+2. 既存 `AGENTS.md` を保持したまま管理ブロックを更新
 3. 同期ブランチへpush
 4. 既存の同期PRを更新、または新規PRを作成
 
-同期Workflowには`MAC_ENABLER_SYNC_TOKEN` secretが必要です。対象repoのContents writeとPull requests writeが必要で、private repoを含む場合は全対象repoへアクセスできるFine-grained tokenを使います。
+同期されないもの：
+
+- `.codex/mac-enabler/` の設定スナップショット
+- モデル名、推論量、承認、sandbox設定
+- プロジェクト固有のdocs、scripts、CI
+- 配下の `AGENTS.md`
+
+Workflowには `MAC_ENABLER_SYNC_TOKEN` secret が必要です。対象repoを追加する場合は、Cloud Agent等で共通ブロックが必要かを先に判断します。
 
 ## Cloud Agent
 
-Cloud Agentの作業ディレクトリは、ローカルの親ディレクトリや兄弟リポジトリを前提にできません。したがって対象リポジトリへ、次をコミットしておきます。
+Cloud Agentは対象repo自身の `AGENTS.md`、セットアップ設定、docs、scripts、CIを前提にします。ローカル端末の `~/.codex/` やmac-enablerの兄弟ディレクトリを前提にしません。
 
-- ルート `AGENTS.md` の管理ブロック
-- `.codex/mac-enabler/` の設定スナップショット
-- `dev-template`を使う新規repoでは、テンプレート由来のGitHub自動化
-
-mac-enablerだけを別リポジトリに置き、対象リポジトリから相対パスで参照する方式はCloud Agentでは成立しません。
+したがってCloud Agentへ渡すべきものは、プロジェクト固有の作業入口と、必要なら短い共通管理ブロックです。中央repoの詳細設定を毎回読ませる方式は、コンテキストと実行時間を増やすため採用しません。
 
 ## 既存AGENTS.mdとの共存
 
-同期スクリプトは、対象ルートの `AGENTS.md` の末尾に管理ブロックを追加します。既に同じブロックがある場合は、そのブロックだけを置換します。
+同期スクリプトは対象ルートの `AGENTS.md` の末尾に管理ブロックを追加します。既に同じブロックがあれば、そのブロックだけを置換します。
 
 - 既存本文は保持する
 - 配下の `AGENTS.md` は触らない
-- 共通ルールをプロジェクト仕様へ転載しない
-- プロジェクト固有のブランチ・テスト・設計ルールを共通側へ移さない
-
-複数の `AGENTS.md` の優先順位は、Codexが実際にいるディレクトリに近いものを優先し、共通ブロックは手順の補助として扱います。プロジェクト固有の事実と共通手順が矛盾した場合は、推測で統合しません。
+- 共通ルールをプロジェクト仕様へ全文転載しない
+- プロジェクト固有のブランチ、テスト、設計ルールを共通側へ移さない
+- 共通ブロックは、プロジェクト固有の事実や受入条件を上書きしない
 
 ## 更新
 
-mac-enablerの設定変更後、各対象リポジトリで同期を実行し、スナップショットの更新をPRにします。同期されていない対象は、古い運用ポリシーで動くため、PR本文にmac-enablerのバージョンを記録します。
+mac-enablerの共通ブロックを変更した場合、許可リストにある対象repoへ同期PRを作ります。対象repoを許可リストへ追加しない限り、そのrepoへは同期されません。
