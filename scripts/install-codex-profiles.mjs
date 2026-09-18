@@ -58,7 +58,7 @@ async function exists(filePath) {
   }
 }
 
-export async function planProfiles(codexHome) {
+export { resolveCodexHome };\n\nexport async function planProfiles(codexHome) {
   const destination = resolveCodexHome(codexHome);
   const profiles = await sourceProfiles();
   const plan = [];
