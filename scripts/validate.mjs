@@ -58,6 +58,11 @@ for (const [profile, binding] of Object.entries(routing.bindings)) {
 assert(template.includes('<!-- MAC-ENABLER:BEGIN -->'), 'Missing managed block start.');
 assert(template.includes('<!-- MAC-ENABLER:END -->'), 'Missing managed block end.');
 assert(workflow.compact_protocol.required_packet_fields.includes('next_action'), 'Missing next_action field.');
+assert(Array.isArray(workflow.context_efficiency?.session_scope), 'Missing context efficiency session policy.');
+assert(Array.isArray(workflow.context_efficiency?.review_policy), 'Missing context efficiency review policy.');
+assert(Array.isArray(workflow.context_efficiency?.long_running_commands), 'Missing long-running command policy.');
+assert(template.includes('1つのセッションへ無関係なIssueを継ぎ足さない'), 'Missing fresh-session guidance in shared AGENTS block.');
+assert(template.includes('review → fix → review'), 'Missing consolidated-review guidance in shared AGENTS block.');
 assert(routing.bindings.astra_light.cli_profile === 'astra_light', 'Astra Light binding failed.');
 assert(routing.bindings.luna_max.cli_profile === 'luna_max', 'Luna Max binding failed.');
 
