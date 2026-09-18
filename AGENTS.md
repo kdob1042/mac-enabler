@@ -9,6 +9,8 @@
 3. `config/workflow.json`
 4. 必要に応じて `docs/compact-protocol.md` と `docs/integration.md`
 
+端末側のCodexプロファイルを導入・確認するときは、READMEに記載した `npm run codex:setup` を使う。`~/.codex/config.toml`、認証、履歴、ログ、キャッシュを直接上書きしない。
+
 ## 変更ルール
 
 - 共通運用の正本はこのリポジトリの `config/`、`templates/`、`scripts/` とする。
