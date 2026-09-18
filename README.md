@@ -62,8 +62,8 @@ mac-enabler/
 
 | CLI profile | 表示名 | モデル設定 | 主な用途 |
 | --- | --- | --- | --- |
-| `luna_max` | Luna Max | `gpt-5.6-luna` / `low` | 既存ソース解析、変更箇所の特定、簡単な実装 |
-| `astra_light` | Astra Light | `gpt-6-astra` / `xhigh` | 難しい設計、難しい実装、重大なリスク |
+| `luna_max` | Luna Max | `gpt-5.6-luna` / `xhigh` | 既存ソース解析、変更箇所の特定、簡単な実装 |
+| `astra_light` | Astra Light | `gpt-6-astra` / `low` | 難しい設計、難しい実装、重大なリスク |
 
 ### Codexが実行するセットアップ
 
