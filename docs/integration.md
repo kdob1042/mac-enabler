@@ -11,7 +11,19 @@
 
 `mac-enabler`を置いただけでは、別repoのエージェントはその内容を自動的には継承しません。逆に、中央の `model-routing.json`、`workflow.json`、コンパクション文書を各repoへコピーしても、設定の自動適用やモデル切替にはなりません。
 
-## ローカル
+## 端末側のCodexセットアップ
+
+端末で `mac-enabler` をcloneしたら、Codexはリポジトリ内のセットアップスクリプトを実行できます。
+
+```bash
+npm run codex:setup -- --install
+```
+
+このスクリプトが `~/.codex/` に導入するのは `astra_light` と `luna_max` の2プロフィールだけです。既存の `config.toml`、認証、履歴、ログ、キャッシュは変更しません。
+
+開発対象repoは別にcloneして使います。mac-enablerの兄弟ディレクトリや、中央repoの詳細設定を対象repoから読む必要はありません。
+
+## ローカルrepo
 
 兄弟repoへ共通ブロックを適用する必要がある場合だけ実行します。
 
@@ -46,6 +58,8 @@ Workflowは対象repoごとに次を行います。
 - モデル名、推論量、承認、sandbox設定
 - プロジェクト固有のdocs、scripts、CI
 - 配下の `AGENTS.md`
+
+旧方式の同期PRが未マージなら閉じます。旧スナップショットがすでにマージ済みの場合だけ、対象repoで削除PRを作ります。既存のプロジェクト固有ファイルは削除しません。
 
 Workflowには `MAC_ENABLER_SYNC_TOKEN` secret が必要です。対象repoを追加する場合は、Cloud Agent等で共通ブロックが必要かを先に判断します。
 
