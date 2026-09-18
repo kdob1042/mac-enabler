@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "targets": [
+    {
+      "repository": "kdob1042/dev-template",
+      "base_branch": "main",
+      "sync_branch": "chore/sync-mac-enabler",
+      "role": "template"
+    },
+    {
+      "repository": "kdob1042/manga-mac",
+      "base_branch": "dev",
+      "sync_branch": "chore/sync-mac-enabler",
+      "role": "consumer"
+    }
+  ]
+}
