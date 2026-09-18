@@ -118,5 +118,32 @@
     "Issue and PR references are correct.",
     "Remaining work has an owner and a next action.",
     "The handoff packet is durable before the context is compacted or handed off."
-  ]
+  ],
+  "context_efficiency": {
+    "session_scope": [
+      "Keep one coherent Issue or implementation unit per session.",
+      "Do not append unrelated Issues to a session with substantial implementation or tool history.",
+      "Before moving a large-context task to a fresh session, persist a handoff packet to the Issue or PR."
+    ],
+    "subagent_policy": [
+      "Prefer the primary agent for work that depends on the same context.",
+      "Use subagents only for bounded, independently completable tasks.",
+      "Do not duplicate the same investigation across multiple agents without a stated reason."
+    ],
+    "review_policy": [
+      "Collect review findings in one consolidated pass when practical.",
+      "Apply related fixes as a batch.",
+      "Perform one final verification pass instead of repeated micro review-fix loops."
+    ],
+    "long_running_commands": [
+      "Do not dedicate a reasoning agent to watching a long-running test, build, or deploy.",
+      "Avoid short-interval model polling while a command is still running.",
+      "Prefer a single blocking execution or coarse external wait, then inspect the final exit code and logs."
+    ],
+    "verification_policy": [
+      "Run the smallest relevant checks first.",
+      "Run required repository-wide checks at an appropriate completion boundary.",
+      "Do not rerun expensive full-suite verification after every small edit unless the change justifies it."
+    ]
+  }
 }
