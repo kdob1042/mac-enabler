@@ -19,7 +19,9 @@
 npm run codex:setup -- --install
 ```
 
-このスクリプトが `~/.codex/` に導入するのは `astra_light` と `luna_max` の2プロフィールだけです。既存の `config.toml`、認証、履歴、ログ、キャッシュは変更しません。
+このスクリプトが `~/.codex/` に導入するのは `luna_max` と `astra_light` の2プロフィールだけです。既存の `config.toml`、認証、履歴、ログ、キャッシュは変更しません。
+
+通常は `luna_max` で既存ソースを解析して変更箇所を特定し、コンパクション後に難しい設計・実装だけ `astra_light` へ切り替えます。簡単な実装はそのまま `luna_max` で進めます。
 
 開発対象repoは別にcloneして使います。mac-enablerの兄弟ディレクトリや、中央repoの詳細設定を対象repoから読む必要はありません。
 
