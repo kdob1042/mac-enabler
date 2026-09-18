@@ -1,4 +1,0 @@
-# ~/.codex/deep.config.toml
-# Use for difficult design, migration, and high-risk debugging work.
-model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
