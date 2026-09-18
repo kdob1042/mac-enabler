@@ -116,9 +116,9 @@ async function syncRepository(target, { dryRun }) {
 
   await run('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: workdir });
   await run('git', ['config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], { cwd: workdir });
-  await run('git', ['add', 'AGENTS.md', '.codex/mac-enabler'], { cwd: workdir });
+  await run('git', ['add', 'AGENTS.md'], { cwd: workdir });
   await run('git', [
-    'commit', '-m', 'chore(mac-enabler): sync shared Codex layer'
+    'commit', '-m', 'chore(mac-enabler): sync shared AGENTS workflow'
   ], { cwd: workdir });
   await run('git', [
     'push', '--force-with-lease', 'origin',
@@ -144,13 +144,13 @@ async function syncRepository(target, { dryRun }) {
   const body = [
     '## 目的',
     '',
-    'mac-enablerの共通Codex運用レイヤーを同期する。',
+    'mac-enablerの最小共通AGENTS運用ブロックを同期する。',
     '',
     '- Source: https://github.com/kdob1042/mac-enabler',
     '- Role: ' + target.role,
     '- Changed paths: ' + result.changed_paths.join(', '),
     '',
-    'このPRは自動同期で作成されました。プロジェクト固有のファイルとルールは変更していません。'
+    'このPRは自動同期で作成されました。モデル設定やプロジェクト固有のファイル・ルールは変更していません。'
   ].join('\n');
   const created = await run('gh', [
     'pr', 'create',
