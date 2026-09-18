@@ -2,17 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": 1,
   "profile_order": [
-    "fast",
+    "cheap",
     "balanced",
     "strong",
     "max"
   ],
   "profiles": {
-    "fast": {
-      "cost_tier": "low",
-      "purpose": "分類、抽出、単純な整形、状態確認",
-      "reasoning_depth": "low"
-    },
     "balanced": {
       "cost_tier": "medium",
       "purpose": "通常の実装、文書更新、通常の検証",
@@ -27,12 +22,14 @@
       "cost_tier": "maximum",
       "purpose": "アーキテクチャ、正本設計、重大な破壊リスクを伴う判断",
       "reasoning_depth": "maximum"
+    },
+    "cheap": {
+      "cost_tier": "low",
+      "purpose": "分類、抽出、単純な整形、状態確認",
+      "reasoning_depth": "low"
     }
   },
   "bindings": {
-    "fast": {
-      "env": "CODEX_MODEL_FAST"
-    },
     "balanced": {
       "env": "CODEX_MODEL_BALANCED"
     },
@@ -41,6 +38,9 @@
     },
     "max": {
       "env": "CODEX_MODEL_MAX"
+    },
+    "cheap": {
+      "env": "CODEX_MODEL_CHEAP"
     }
   },
   "routes": [
@@ -124,7 +124,7 @@
     },
     {
       "id": "triage",
-      "profile": "fast",
+      "profile": "cheap",
       "keywords": [
         "triage",
         "classify",
@@ -139,7 +139,7 @@
     },
     {
       "id": "handoff",
-      "profile": "fast",
+      "profile": "cheap",
       "keywords": [
         "handoff",
         "checkpoint",
