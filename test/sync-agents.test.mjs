@@ -20,6 +20,7 @@ test('sync preserves existing AGENTS content and is idempotent', async () => {
     const content = await readFile(path.join(target, 'AGENTS.md'), 'utf8');
     assert.match(content, /Keep project-specific facts here/);
     assert.equal((content.match(/MAC-ENABLER:BEGIN/g) ?? []).length, 1);
+    assert.deepEqual(first.changed_paths, ['AGENTS.md']);
 
     const check = await syncTarget(target, { check: true });
     assert.equal(check.changed, false);
