@@ -1,0 +1,72 @@
+name: Sync mac-enabler consumers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/sync-targets.json"
+      - ".github/workflows/sync-targets.yml"
+      - "config/**"
+      - "docs/compact-protocol.md"
+      - "scripts/sync-agents.mjs"
+      - "scripts/sync-repositories.mjs"
+      - "templates/shared-agents-block.md"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Optional owner/repo to sync; empty means all configured targets
+        required: false
+        type: string
+      dry_run:
+        description: Report changes without pushing or creating PRs
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mac-enabler-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.MAC_ENABLER_SYNC_TOKEN }}
+      TARGET_FILTER: ${{ inputs.target || '' }}
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}
+    steps:
+      - name: Check out mac-enabler
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check sync credential
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Configure the MAC_ENABLER_SYNC_TOKEN secret with access to every configured target repository."
+            exit 1
+          fi
+
+      - name: Validate source configuration
+        run: |
+          npm run validate
+          node --input-type=module -e "import('./scripts/sync-repositories.mjs')"
+
+      - name: Sync configured repositories
+        run: |
+          args=()
+          if [ -n "$TARGET_FILTER" ]; then
+            args+=(--target "$TARGET_FILTER")
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          node scripts/sync-repositories.mjs "${args[@]}"
