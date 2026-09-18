@@ -1,0 +1,4 @@
+# ~/.codex/review.config.toml
+# Use for non-trivial reviews and regression analysis.
+model = "gpt-5.6-terra"
+model_reasoning_effort = "high"
