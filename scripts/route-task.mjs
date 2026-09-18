@@ -78,6 +78,9 @@ export function routeTask(task, config) {
     route_matches: selected.matched,
     guardrail_matches: guardrailMatches,
     elevated_by: elevatedBy,
+    binding_profile: binding.cli_profile ?? null,
+    binding_model: binding.model ?? null,
+    binding_reasoning_effort: binding.reasoning_effort ?? null,
     binding_env: binding.env ?? null,
     enforcement: config.enforcement
   };
@@ -116,7 +119,9 @@ async function main() {
 
   console.log('route: ' + result.route);
   console.log('profile: ' + result.profile);
-  console.log('binding_env: ' + result.binding_env);
+  console.log('codex_profile: ' + result.binding_profile);
+  console.log('model: ' + result.binding_model);
+  console.log('reasoning_effort: ' + result.binding_reasoning_effort);
   if (result.elevated_by.length > 0) {
     console.log('guardrails: ' + result.elevated_by.join(', '));
   }
