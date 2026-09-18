@@ -9,6 +9,7 @@
     "test": "node --test",
     "codex:profiles": "node scripts/install-codex-profiles.mjs",
     "codex:setup": "node scripts/setup-codex.mjs",
-    "cursor:setup": "node scripts/setup-cursor.mjs"
+    "cursor:setup": "node scripts/setup-cursor.mjs",
+    "cursor:project": "node scripts/setup-cursor-project.mjs"
   }
 }

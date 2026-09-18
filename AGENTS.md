@@ -8,7 +8,8 @@
 2. `config/model-routing.json`
 3. `config/workflow.json`
 4. 必要に応じて `docs/compact-protocol.md` と `docs/integration.md`
-5. Cursor／Codex併用の変更では `docs/cursor-codex.md`
+5. Cursor／Codex併用の変更では `docs/cursor-codex.md`、`docs/agent-workflow.md`
+6. Codex固有の変更では `docs/codex.md`、Cursor固有の変更では `docs/cursor.md`
 
 端末側のCodexプロファイルを導入・確認するときは、READMEに記載した `npm run codex:setup` を使う。`~/.codex/config.toml`、認証、履歴、ログ、キャッシュを直接上書きしない。
 Cursor CLIの端末設定を導入・確認するときは、READMEに記載した `npm run cursor:setup` を使う。`~/.cursor/cli-config.json` の未管理設定・認証・履歴・キャッシュを直接上書きしない。

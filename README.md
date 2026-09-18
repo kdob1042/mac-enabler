@@ -27,6 +27,13 @@ Codex・ChatGPT Work・Cloud Agentで使う共通運用を、必要な範囲だ�
 - 各プロジェクトrepo：固有の設計、ブランチ、テスト、データ、受入条件
 - 利用端末：Codex本体のモデル、推論量、承認、sandbox、サブエージェント上限
 
+## マニュアル
+
+- [共通運用](docs/agent-workflow.md)：正本、Issue／PR、引き継ぎ、自動化と手動作業の境界
+- [Codex](docs/codex.md)：プロフィール、ルーティング、端末セットアップ
+- [Cursor](docs/cursor.md)：CLI、Projects、Cloud Agents、hooks
+- [Cursor／Codex入口](docs/cursor-codex.md)：分冊へのリンクと全体方針
+
 ## 構成
 
 ```text
@@ -41,6 +48,9 @@ mac-enabler/
 │   └── workflow.json
 ├── docs/
 │   ├── compact-protocol.md
+│   ├── agent-workflow.md
+│   ├── codex.md
+│   ├── cursor.md
 │   └── integration.md
 ├── runtime/
 │   ├── base-config.snippet.toml
@@ -53,6 +63,7 @@ mac-enabler/
 │   ├── install-codex-profiles.mjs
 │   ├── route-task.mjs
 │   ├── setup-codex.mjs
+│   ├── setup-cursor-project.mjs
 │   ├── setup-cursor.mjs
 │   ├── sync-agents.mjs
 │   ├── sync-repositories.mjs
@@ -122,6 +133,21 @@ npm run cursor:setup -- --check
 このスクリプトはCursor CLIの設定、認証、IDEの個人設定、Cloud Agent／Grok Botの設定を同時に変更するものではありません。モデル選択はCursor側の `/model` または利用環境で行います。
 
 Cursor公式のプロジェクト規約入口は各repoの `AGENTS.md` です。共通規約のrepo配布はPR #3の短い管理ブロックに限定します。
+
+## 対象repoのCursor Cloud環境
+
+Cursor Projects／Cloud Agentsで必要なrepo固有の環境を、対象repoを明示して生成・検査できます。インストールとテストのコマンドはプロジェクト側で確認してから渡してください。
+
+```bash
+npm run cursor:project -- --install \
+  --target ../target-repository \
+  --install-command "npm ci" \
+  --test-command "npm test"
+
+npm run cursor:project -- --check --target ../target-repository
+```
+
+生成対象は対象repoの `.cursor/environment.json` と、`AGENTS.md` 内の `MAC-ENABLER:CURSOR-CLOUD` ブロックだけです。既存の本文、hooks、CI、Secrets、端末設定を一括同期しません。既存の管理対象を変更する場合だけ `--force` を付け、バックアップを確認してください。ProjectsのGitHub接続、Secrets、coordinator、購読、レビューはCursor側で手動設定します。詳細は [`docs/cursor.md`](docs/cursor.md) を参照してください。
 
 
 ## 任意のルーティング補助
