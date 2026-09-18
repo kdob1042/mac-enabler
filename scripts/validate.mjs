@@ -15,10 +15,24 @@ function assert(condition, message) {
 
 const routing = await loadRoutingConfig();
 const workflow = await readJson('config/workflow.json');
+const syncTargets = await readJson('.github/sync-targets.json');
 const template = await readFile(path.join(ROOT, 'templates', 'shared-agents-block.md'), 'utf8');
 
 assert(routing.version === 1, 'Unexpected routing version.');
 assert(workflow.version === 1, 'Unexpected workflow version.');
+assert(syncTargets.version === 1, 'Unexpected sync target version.');
+assert(Array.isArray(syncTargets.targets) && syncTargets.targets.length > 0, 'No sync targets configured.');
+
+const repositories = new Set();
+for (const target of syncTargets.targets) {
+  assert(
+    target.repository && target.base_branch && target.sync_branch,
+    'Every sync target needs repository, base_branch, and sync_branch.'
+  );
+  assert(!repositories.has(target.repository), 'Duplicate sync target: ' + target.repository);
+  repositories.add(target.repository);
+}
+
 assert(new Set(routing.profile_order).size === routing.profile_order.length, 'Duplicate profiles.');
 for (const route of routing.routes) {
   assert(routing.profiles[route.profile], 'Unknown route profile: ' + route.id);
