@@ -30,17 +30,25 @@
     }
   },
   "bindings": {
+    "cheap": {
+      "cli_profile": "cheap",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "low"
+    },
     "balanced": {
-      "env": "CODEX_MODEL_BALANCED"
+      "cli_profile": "balanced",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium"
     },
     "strong": {
-      "env": "CODEX_MODEL_STRONG"
+      "cli_profile": "review",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "high"
     },
     "max": {
-      "env": "CODEX_MODEL_MAX"
-    },
-    "cheap": {
-      "env": "CODEX_MODEL_CHEAP"
+      "cli_profile": "deep",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "xhigh"
     }
   },
   "routes": [
