@@ -79,7 +79,7 @@ node scripts/route-task.mjs --task "設計を見直して実装方針を決め�
 node scripts/route-task.mjs --json --task "Issueの状態を一覧化する"
 ```
 
-出力は `fast`、`balanced`、`strong`、`max` の能力目安です。実際のモデル選択は利用ホストまたは呼び出し側で行います。
+出力は `cheap`、`balanced`、`strong`、`max` の能力目安です。実際のモデル選択は利用ホストまたは呼び出し側で行います。
 
 ## 明示対象repoへの同期
 
