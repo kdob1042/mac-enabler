@@ -13,6 +13,19 @@ test('resolveCodexHome prefers an explicit directory', () => {
   assert.equal(resolveCodexHome('/tmp/codex-test'), path.resolve('/tmp/codex-test'));
 });
 
+test('only the two selected profiles are available for installation', async () => {
+  const codexHome = await mkdtemp(path.join(os.tmpdir(), 'mac-enabler-codex-'));
+  try {
+    const plan = await planProfiles(codexHome);
+    assert.deepEqual(plan.map((entry) => entry.name), [
+      'astra_light.config.toml',
+      'luna_max.config.toml'
+    ]);
+  } finally {
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test('profile installation does not touch user config.toml', async () => {
   const codexHome = await mkdtemp(path.join(os.tmpdir(), 'mac-enabler-codex-'));
   try {
