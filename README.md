@@ -1,36 +1,32 @@
 # mac-enabler
 
-複数のGitHubリポジトリを、Codex・ChatGPT Work・Cloud Agentで一貫した手順に乗せるための共通運用レイヤーです。
+Codex・ChatGPT Work・Cloud Agentで使う共通運用を、必要な範囲だけ管理するためのリポジトリです。
 
-これはプロジェクトの生成元ではありません。プロジェクト固有のコードや設計は各リポジトリに残し、ここでは次だけを共通化します。
+プロジェクトのコード、設計、ブランチ、テスト、データの正本ではありません。各プロジェクトの正本は、それぞれのリポジトリに残します。
 
-- 作業種別からモデル能力を選ぶルーティングポリシー
-- Issue／PRを正本にした作業フェーズ
-- `compact`／コンパクション前後の引き継ぎ
-- 既存の `AGENTS.md` と共存するための管理ブロック
-- ローカルの兄弟リポジトリへ適用する同期スクリプト
-- 対象リポジトリへ更新PRを作る自動同期
+## 管理境界
 
-## 重要な制約
+| 対象 | 正本 | 各リポジトリへの同期 |
+| --- | --- | --- |
+| Codex本体のモデル・承認・sandbox設定 | 利用端末の `~/.codex/` | しない |
+| 個人共通の短いエージェント指示 | 利用端末のユーザー領域 | しない |
+| 成熟した共通Skill | Codex／Cursorのユーザー領域またはプラグイン | 原則しない |
+| プロジェクト固有の指示・コマンド・検証 | 各リポジトリの `AGENTS.md`、docs、scripts、CI | そのrepoで管理 |
+| Cloud Agentが必ず読む最小の共通運用 | 各対象repoのルート `AGENTS.md` の管理ブロック | 明示した対象だけ |
+| 新規repo用のIssue／PR／Project自動化 | `dev-template` | テンプレートとして利用 |
 
-`mac-enabler` をGitHubに置いただけでは、他のリポジトリのCodexやCloud Agentが自動的にこのリポジトリを読み込むことはありません。
+`mac-enabler`をGitHubに置いただけで、他のrepoのエージェントが自動的に読み込むことはありません。一方で、すべてのrepoへ中央設定のスナップショットを配る必要もありません。
 
-そのため、対象リポジトリへ次のスナップショットをコミットします。
-
-- ルート `AGENTS.md` の `MAC-ENABLER` 管理ブロック
-- `.codex/mac-enabler/model-routing.json`
-- `.codex/mac-enabler/workflow.json`
-- `.codex/mac-enabler/compact-protocol.md`
-
-ローカル環境では、兄弟リポジトリを指定して同期できます。Cloud Agentでは兄弟ディレクトリを前提にせず、同期結果を対象リポジトリ自身へコミットしてください。
+このrepoから対象repoへ同期するのは、Cloud Agentなどがそのrepo内で自動的に読む必要がある短い `AGENTS.md` 管理ブロックだけです。モデルルーティング、workflow設定、コンパクション文書を `.codex/mac-enabler/` として配布しません。
 
 ## 責務分担
 
-- `mac-enabler`：共通Codex設定、管理ブロック、同期スクリプト、同期Workflowの正本
-- `dev-template`：Issue／PR／Project自動化を含む新規リポジトリ用テンプレート
-- 各プロジェクトrepo：プロジェクト固有の設計、ブランチ、テスト、データの正本
+- `mac-enabler`：共通運用の設計、短い管理ブロック、任意のルーティング補助、同期スクリプト
+- `dev-template`：新規repo向けのIssue／PR／Project自動化テンプレート
+- 各プロジェクトrepo：固有の設計、ブランチ、テスト、データ、受入条件
+- 利用端末：Codex本体のモデル、推論量、承認、sandbox、サブエージェント上限
 
-`dev-template`のGitHub自動化ロジックを`mac-enabler`へ重複コピーせず、`dev-template`自体もmac-enablerの同期対象として管理します。
+`config/model-routing.json` は作業種別と必要能力を整理する補助資料です。現在のChatGPT／Codex画面のモデルを自動で切り替える設定ではありません。毎回の作業で必ず分類することも要求しません。
 
 ## 構成
 
@@ -58,83 +54,58 @@ mac-enabler/
 └── test/
 ```
 
-## 使い方
+## 任意のルーティング補助
 
-### 1. ルートを決める
-
-タスクをそのまま実装に投げず、まずルーターへ渡します。
+必要なときだけ、作業種別から能力プロファイルを確認できます。
 
 ```bash
 node scripts/route-task.mjs --task "設計を見直して実装方針を決める"
-node scripts/route-task.mjs --json --task "Issueの状態を確認して一覧化する"
+node scripts/route-task.mjs --json --task "Issueの状態を一覧化する"
 ```
 
-出力される `profile` は、利用するモデル能力の目安です。
+出力は `fast`、`balanced`、`strong`、`max` の能力目安です。実際のモデル選択は利用ホストまたは呼び出し側で行います。
 
-- `fast`: 分類、抽出、単純な整形、状態確認
-- `balanced`: 通常の実装、文書更新、通常の検証
-- `strong`: 複雑な実装、レビュー、障害対応、データ移行
-- `max`: アーキテクチャ、正本設計、重大な破壊リスクを伴う判断
+## 明示対象repoへの同期
 
-このスクリプトは現在の会話のモデルを強制変更しません。API／CLI／SDKなど呼び出し側でモデルを切り替える場合は、`binding_env` を使ってプロファイルをモデルIDへ対応付けます。ChatGPT WorkやCloud Agentで切り替えができない場合でも、作業開始時に選択されたプロファイルを明示します。
+同期対象は `.github/sync-targets.json` の許可リストです。現在は次の2種類を想定します。
 
-### 2. 対象リポジトリへ同期する
+- `dev-template`：新規repoへ配るテンプレートの共通ブロックを更新する
+- Cloud Agentで共通ブロックが必要な既存repo：必要なrepoだけ登録する
 
-兄弟ディレクトリが次のようになっている場合：
+対象repoに対して同期されるのは、既存のルート `AGENTS.md` と共存する管理ブロックだけです。既存本文と配下の `AGENTS.md` は変更しません。
 
-```text
-github/
-├── mac-enabler/
-└── manga-mac/
-```
+ローカルの兄弟repoへ適用する場合：
 
 ```bash
-node scripts/sync-agents.mjs --target ../manga-mac
+node scripts/sync-agents.mjs --target ../target-repository
+node scripts/sync-agents.mjs --target ../target-repository --check
 ```
 
-変更せずに差分だけ確認するには：
+`--check` は変更が必要なら終了コード1になります。
 
-```bash
-node scripts/sync-agents.mjs --target ../manga-mac --check
-```
+## 自動同期
 
-同期スクリプトは、対象リポジトリの既存 `AGENTS.md` を保持したまま管理ブロックだけを追加・更新します。配下の `AGENTS.md` は削除・上書きしません。
-
-### 3. 自動同期
-
-`main`へ共通設定をマージすると、`.github/sync-targets.json`に登録された対象repoへ同期Workflowが走ります。
+`mac-enabler`の`main`へ共通ブロックをマージすると、`.github/sync-targets.json`に明示された対象repoへ更新PRを作成します。
 
 Workflowは次を行います。
 
 1. 対象repoの指定ベースブランチをcloneする
-2. `sync-agents.mjs`で共通ブロックとスナップショットを更新する
-3. `chore/sync-mac-enabler`ブランチへpushする
+2. ルート `AGENTS.md` の管理ブロックだけを更新する
+3. 指定された同期ブランチへpushする
 4. 既存PRがあれば更新し、なければ新規PRを作る
 
-対象repoの一覧とベースブランチは`.github/sync-targets.json`で中央管理します。現在は`dev-template`と`manga-mac`を登録しています。
+モデル設定やプロジェクト固有のファイルは変更しません。対象repoを増やす場合は、Cloud Agentなどでrepo内の共通ブロックが必要かを確認してから `.github/sync-targets.json` に登録します。
 
-Workflowには、対象repoへpushとPR作成ができる`MAC_ENABLER_SYNC_TOKEN`というRepository secretが必要です。private repoを含める場合は、両方の対象repoへアクセスできるFine-grained tokenを登録します。Tokenが未登録の状態ではWorkflowは意図的に失敗し、同期済みとは扱いません。
+Workflowには対象repoへpushとPR作成ができる `MAC_ENABLER_SYNC_TOKEN` Repository secret が必要です。未設定の状態は同期成功とは扱いません。
 
-手動確認はGitHub Actionsの`Sync mac-enabler consumers`から、対象repo指定または`dry_run`で実行できます。
+## 通常の作業順
 
-### 4. 通常の作業順
-
-1. タスクを分類し、ルートとモデルプロファイルを決める
-2. Issue／PR、対象ブランチ、受入条件を確認する
-3. 対象リポジトリの `AGENTS.md` と設計の正本を読む
-4. 小さな作業単位で実装する
-5. 必要最小限の検証を実行する
-6. Issue／PRへ検証結果と残件を書く
-7. コンパクションまたは引き継ぎの前に、引き継ぎパケットを保存する
-
-## AGENTS.mdの責務分離
-
-- 共通管理ブロック：作業手順、ルーティング、コンパクション、引き継ぎ
-- 対象リポジトリのルート `AGENTS.md`：プロジェクト固有の設計・ブランチ・テスト・正本
-- 配下の `AGENTS.md`：ディレクトリ固有の制約
-- Issue／PR：現在の作業状態、受入条件、検証結果、残件
-
-同じ仕様を複数箇所へ全文転載しません。共通ルールとプロジェクトルールが衝突した場合、プロジェクトの事実・ブランチ・検証条件は対象リポジトリ側を優先し、解決できない場合は推測で進めず差分を報告します。
+1. 対象リポジトリの `AGENTS.md`、Issue／PR、設計の正本を読む
+2. 変更範囲と受入条件を決める
+3. 必要な実装を行う
+4. 変更範囲を満たす最小の検証を行う
+5. 未実行の検証と理由をIssue／PRへ残す
+6. コンパクションまたは引き継ぎの前に、永続的な引き継ぎ記録を保存する
 
 ## 検証
 
