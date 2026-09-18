@@ -2,4 +2,4 @@
 # Display label: Astra Light
 # Use for difficult design and difficult implementation.
 model = "gpt-6-astra"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "low"
