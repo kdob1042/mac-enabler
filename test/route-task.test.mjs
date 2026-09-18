@@ -8,12 +8,14 @@ test('architecture work routes to max', () => {
   const result = routeTask('全体設計を見直す', config);
   assert.equal(result.route, 'architecture');
   assert.equal(result.profile, 'max');
+  assert.equal(result.binding_profile, 'deep');
 });
 
 test('simple status work routes to cheap', () => {
   const result = routeTask('Issueの状態を一覧化する', config);
   assert.equal(result.route, 'triage');
   assert.equal(result.profile, 'cheap');
+  assert.equal(result.binding_profile, 'cheap');
 });
 
 test('dangerous terms elevate the profile', () => {
