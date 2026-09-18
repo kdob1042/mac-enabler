@@ -2,59 +2,39 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": 1,
   "profile_order": [
-    "cheap",
-    "balanced",
-    "strong",
-    "max"
+    "astra_light",
+    "luna_max"
   ],
   "profiles": {
-    "balanced": {
-      "cost_tier": "medium",
-      "purpose": "通常の実装、文書更新、通常の検証",
-      "reasoning_depth": "medium"
-    },
-    "strong": {
-      "cost_tier": "high",
-      "purpose": "複雑な実装、レビュー、障害対応、データ移行",
-      "reasoning_depth": "high"
-    },
-    "max": {
-      "cost_tier": "maximum",
-      "purpose": "アーキテクチャ、正本設計、重大な破壊リスクを伴う判断",
-      "reasoning_depth": "maximum"
-    },
-    "cheap": {
+    "astra_light": {
+      "display_name": "Astra Light",
       "cost_tier": "low",
-      "purpose": "分類、抽出、単純な整形、状態確認",
+      "purpose": "通常の実装、文書更新、分類、状態確認、通常の検証",
       "reasoning_depth": "low"
+    },
+    "luna_max": {
+      "display_name": "Luna Max",
+      "cost_tier": "maximum",
+      "purpose": "アーキテクチャ、レビュー、障害対応、移行、重大な破壊リスクを伴う判断",
+      "reasoning_depth": "maximum"
     }
   },
   "bindings": {
-    "cheap": {
-      "cli_profile": "cheap",
-      "model": "gpt-5.6-luna",
+    "astra_light": {
+      "cli_profile": "astra_light",
+      "model": "gpt-6-astra",
       "reasoning_effort": "low"
     },
-    "balanced": {
-      "cli_profile": "balanced",
-      "model": "gpt-5.6-terra",
-      "reasoning_effort": "medium"
-    },
-    "strong": {
-      "cli_profile": "review",
-      "model": "gpt-5.6-terra",
-      "reasoning_effort": "high"
-    },
-    "max": {
-      "cli_profile": "deep",
-      "model": "gpt-5.6-sol",
+    "luna_max": {
+      "cli_profile": "luna_max",
+      "model": "gpt-5.6-luna",
       "reasoning_effort": "xhigh"
     }
   },
   "routes": [
     {
       "id": "architecture",
-      "profile": "max",
+      "profile": "luna_max",
       "keywords": [
         "architecture",
         "design",
@@ -68,7 +48,7 @@
     },
     {
       "id": "incident",
-      "profile": "strong",
+      "profile": "luna_max",
       "keywords": [
         "incident",
         "regression",
@@ -82,7 +62,7 @@
     },
     {
       "id": "review",
-      "profile": "strong",
+      "profile": "luna_max",
       "keywords": [
         "review",
         "audit",
@@ -94,7 +74,7 @@
     },
     {
       "id": "implementation",
-      "profile": "balanced",
+      "profile": "astra_light",
       "keywords": [
         "implement",
         "implementation",
@@ -108,7 +88,7 @@
     },
     {
       "id": "verification",
-      "profile": "balanced",
+      "profile": "astra_light",
       "keywords": [
         "test",
         "verify",
@@ -120,7 +100,7 @@
     },
     {
       "id": "documentation",
-      "profile": "balanced",
+      "profile": "astra_light",
       "keywords": [
         "document",
         "docs",
@@ -132,7 +112,7 @@
     },
     {
       "id": "triage",
-      "profile": "cheap",
+      "profile": "astra_light",
       "keywords": [
         "triage",
         "classify",
@@ -147,7 +127,7 @@
     },
     {
       "id": "handoff",
-      "profile": "cheap",
+      "profile": "astra_light",
       "keywords": [
         "handoff",
         "checkpoint",
@@ -161,7 +141,7 @@
   "guardrails": [
     {
       "id": "data-loss-or-production",
-      "minimum_profile": "strong",
+      "minimum_profile": "luna_max",
       "keywords": [
         "production",
         "本番",
@@ -180,7 +160,7 @@
     },
     {
       "id": "migration-or-public-contract",
-      "minimum_profile": "strong",
+      "minimum_profile": "luna_max",
       "keywords": [
         "migration",
         "migrate",
@@ -195,11 +175,11 @@
   ],
   "fallback": {
     "route": "implementation",
-    "profile": "balanced"
+    "profile": "astra_light"
   },
   "enforcement": {
-    "policy": "The router selects a required capability profile; the caller maps that profile to an actual model.",
+    "policy": "The router selects one of two capability profiles; the caller maps that profile to an actual model.",
     "chatgpt_work": "Model selection may remain manual. Declare the profile instead of pretending that a switch occurred.",
-    "cli_or_sdk": "Map binding_env to a configured model ID before starting the task."
+    "cli_or_sdk": "Map the selected CLI profile to a configured model ID before starting the task."
   }
 }
