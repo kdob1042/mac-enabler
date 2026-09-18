@@ -53,6 +53,22 @@
       "when": "Use before compaction or when work moves to another session or agent."
     }
   ],
+  "model_selection": {
+    "source_analysis": {
+      "profile": "luna_max",
+      "purpose": "Read the existing source, trace relationships, and locate the change points before writing code."
+    },
+    "compaction_boundary": {
+      "before": "Save the current analysis, scope, changed files if any, tests, remaining work, and next action to a durable Issue or PR handoff.",
+      "after": "Read the latest handoff and re-evaluate implementation difficulty before selecting the implementation profile."
+    },
+    "implementation": {
+      "simple": "luna_max",
+      "difficult": "astra_light"
+    },
+    "verification": "luna_max",
+    "risk_override": "Use astra_light for destructive, production, migration, credential, or public-contract risk."
+  },
   "source_of_truth": {
     "user_scope": "The current explicit user request",
     "project_rules": "The target repository root and applicable nested AGENTS.md files",
