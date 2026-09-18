@@ -27,6 +27,27 @@ npm run codex:setup -- --install
 
 開発対象repoは別にcloneして使います。mac-enablerの兄弟ディレクトリや、中央repoの詳細設定を対象repoから読む必要はありません。
 
+
+## 端末側のCursor CLI設定
+
+Cursor CLIのグローバル設定は `~/.cursor/cli-config.json` で管理します。mac-enablerは、Cursor公式のCLI設定形式に合わせた権限・表示デフォルトを、既存設定を保持しながら一度に導入します。
+
+```bash
+npm run cursor:setup -- --install
+```
+
+確認だけ行う場合：
+
+```bash
+npm run cursor:setup -- --check
+```
+
+既存設定を管理値へ更新する場合だけ `--force` を付けます。更新前にバックアップを作成し、ユーザー独自の未管理フィールドと権限項目は保持します。`CURSOR_CONFIG_DIR` または `--cursor-config-dir PATH` で導入先を変更できます。
+
+このスクリプトはCursor CLIの設定、認証、IDEの個人設定、Cloud Agent／Grok Botの設定を同時に変更するものではありません。モデル選択はCursor側の `/model` または利用環境で行います。
+
+Cursor公式のプロジェクト規約入口は各repoの `AGENTS.md` です。共通規約のrepo配布はPR #3の短い管理ブロックに限定します。
+
 ## ローカルrepo
 
 兄弟repoへ共通ブロックを適用する必要がある場合だけ実行します。

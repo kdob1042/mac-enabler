@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "editor": { "vimMode": false },
+  "permissions": {
+    "allow": [
+      "Shell(git)", "Shell(node)", "Shell(npm)", "Shell(pnpm)", "Shell(yarn)", "Shell(bun)",
+      "Read(**/*)", "Write(**/*)", "WebFetch(*.github.com)"
+    ],
+    "deny": [
+      "Shell(rm)", "Shell(sudo)", "Shell(shutdown)", "Shell(reboot)",
+      "Shell(git:clean*)", "Shell(git:reset*)",
+      "Read(**/.env*)", "Read(**/*.key)", "Read(**/*.pem)", "Read(**/*.p12)",
+      "Write(**/.env*)", "Write(**/*.key)", "Write(**/*.pem)", "Write(**/*.p12)"
+    ]
+  },
+  "approvalMode": "auto-review",
+  "notifications": true,
+  "hints": true,
+  "rewind": true,
+  "suggestNextPrompt": true
+}

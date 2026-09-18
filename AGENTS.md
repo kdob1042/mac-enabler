@@ -1,6 +1,6 @@
 # mac-enabler のエージェント入口
 
-このリポジトリは、複数のGitHubリポジトリでCodex／ChatGPT Work／Cloud Agentを使うための共通運用レイヤーを管理する。プロジェクトのコードや設計書を管理するテンプレートではない。
+このリポジトリは、複数のGitHubリポジトリでCursor／Codex／ChatGPT Work／Cloud Agentを使うための共通運用レイヤーを管理する。プロジェクトのコードや設計書を管理するテンプレートではない。
 
 ## 作業前に読むもの
 
@@ -8,15 +8,18 @@
 2. `config/model-routing.json`
 3. `config/workflow.json`
 4. 必要に応じて `docs/compact-protocol.md` と `docs/integration.md`
+5. Cursor／Codex併用の変更では `docs/cursor-codex.md`
 
 端末側のCodexプロファイルを導入・確認するときは、READMEに記載した `npm run codex:setup` を使う。`~/.codex/config.toml`、認証、履歴、ログ、キャッシュを直接上書きしない。
+Cursor CLIの端末設定を導入・確認するときは、READMEに記載した `npm run cursor:setup` を使う。`~/.cursor/cli-config.json` の未管理設定・認証・履歴・キャッシュを直接上書きしない。
 
 ## 変更ルール
 
 - 共通運用の正本はこのリポジトリの `config/`、`templates/`、`scripts/` とする。
 - プロジェクト固有の設計・ブランチ・テスト・データ正本は対象リポジトリの `AGENTS.md` と文書を正本とする。ここへ転載して二重管理しない。
 - 対象リポジトリに適用する場合は、`scripts/sync-agents.mjs` を使う。対象の既存 `AGENTS.md` 全体を上書きしてはならない。
-- モデルルーティングは「作業種別から必要能力を決める」仕組みであり、現在のChatGPT／Codex画面のモデルを強制変更したと主張してはならない。実際にモデルを切り替えられたかは、利用ホストまたは呼び出し側で確認する。
+- Cursor／Codex併用を理由にrepo同期を拡大しない。配布は短いAGENTS.md管理ブロックのみとし、端末設定・共通Skill・設定検査用CIの各repoコピーは行わない。
+- モデルルーティングは「作業種別から必要能力を決める」仕組みであり、現在のChatGPT／Codex／Cursor画面のモデルを強制変更したと主張してはならない。実際にモデルを切り替えられたかは、利用ホストまたは呼び出し側で確認する。
 - `compact`／自動コンパクションはホスト側の機能である。コンパクション前に、Issue／PRまたは指定された引き継ぎ先へ作業状態を保存する規約を変更しない。
 - 変更はブランチで行い、検証後にPRを作成する。既存の`main`へ直接pushしない。
 - 変更後は `npm test` と `npm run validate` を実行する。

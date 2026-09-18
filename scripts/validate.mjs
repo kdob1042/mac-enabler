@@ -16,10 +16,15 @@ function assert(condition, message) {
 const routing = await loadRoutingConfig();
 const workflow = await readJson('config/workflow.json');
 const syncTargets = await readJson('.github/sync-targets.json');
+const cursorConfig = await readJson('runtime/cursor/cli-config.json');
 const template = await readFile(path.join(ROOT, 'templates', 'shared-agents-block.md'), 'utf8');
 
 assert(routing.version === 1, 'Unexpected routing version.');
 assert(workflow.version === 1, 'Unexpected workflow version.');
+assert(cursorConfig.version === 1, 'Unexpected Cursor CLI config version.');
+assert(Array.isArray(cursorConfig.permissions?.allow), 'Cursor allow permissions must be an array.');
+assert(Array.isArray(cursorConfig.permissions?.deny), 'Cursor deny permissions must be an array.');
+assert(cursorConfig.permissions.deny.includes('Shell(rm)'), 'Cursor config must deny rm.');
 assert(routing.profiles.astra_light && routing.profiles.luna_max, 'Both Astra Light and Luna Max profiles are required.');
 assert(!routing.profiles.cheap && !routing.profiles.balanced && !routing.profiles.strong && !routing.profiles.max, 'Legacy capability profiles must be removed.');
 assert(routing.phase_profiles.source_analysis === 'luna_max', 'Source analysis must use Luna Max.');
