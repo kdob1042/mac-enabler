@@ -89,7 +89,7 @@ async function syncRepository(target, { dryRun }) {
   await rm(workdir, { recursive: true, force: true });
   await mkdir(path.dirname(workdir), { recursive: true });
 
-  console.log('\\n=== ' + target.repository + ' (' + target.role + ') ===');
+  console.log('\n=== ' + target.repository + ' (' + target.role + ') ===');
   await run('gh', [
     'repo', 'clone', target.repository, workdir,
     '--', '--branch', target.base_branch, '--depth', '1'
@@ -151,7 +151,7 @@ async function syncRepository(target, { dryRun }) {
     '- Changed paths: ' + result.changed_paths.join(', '),
     '',
     'このPRは自動同期で作成されました。プロジェクト固有のファイルとルールは変更していません。'
-  ].join('\\n');
+  ].join('\n');
   const created = await run('gh', [
     'pr', 'create',
     '--repo', target.repository,
