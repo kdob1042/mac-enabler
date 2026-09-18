@@ -1,5 +1,5 @@
 # ~/.codex/luna_max.config.toml
 # Display label: Luna Max
-# Use for architecture, review, incidents, migrations, and destructive-risk work.
+# Use for existing-source analysis, locating change points, and simple implementation.
 model = "gpt-5.6-luna"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "low"
