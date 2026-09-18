@@ -89,11 +89,16 @@ async function syncRepository(target, { dryRun }) {
   await rm(workdir, { recursive: true, force: true });
   await mkdir(path.dirname(workdir), { recursive: true });
 
-  console.log('\n=== ' + target.repository + ' (' + target.role + ') ===');
+  console.log('\\n=== ' + target.repository + ' (' + target.role + ') ===');
   await run('gh', [
     'repo', 'clone', target.repository, workdir,
     '--', '--branch', target.base_branch, '--depth', '1'
   ]);
+
+  await run('git', [
+    'fetch', 'origin',
+    'refs/heads/' + target.sync_branch + ':refs/remotes/origin/' + target.sync_branch
+  ], { cwd: workdir, allowFailure: true });
 
   const branchRef = 'origin/' + target.base_branch;
   await run('git', ['switch', '--create', target.sync_branch, branchRef], { cwd: workdir });
@@ -146,7 +151,7 @@ async function syncRepository(target, { dryRun }) {
     '- Changed paths: ' + result.changed_paths.join(', '),
     '',
     'このPRは自動同期で作成されました。プロジェクト固有のファイルとルールは変更していません。'
-  ].join('\n');
+  ].join('\\n');
   const created = await run('gh', [
     'pr', 'create',
     '--repo', target.repository,
@@ -188,7 +193,13 @@ async function main() {
   console.log(JSON.stringify({ results }, null, 2));
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+export { loadConfig, parseArgs, syncRepository };
+
+const isMain = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
