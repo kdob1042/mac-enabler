@@ -20,6 +20,9 @@ const template = await readFile(path.join(ROOT, 'templates', 'shared-agents-bloc
 
 assert(routing.version === 1, 'Unexpected routing version.');
 assert(workflow.version === 1, 'Unexpected workflow version.');
+assert(routing.profiles.cheap && !routing.profiles.fast, 'Use cheap instead of fast for low-cost work.');
+assert(workflow.phases.find((phase) => phase.id === 'classify')?.required === false, 'Classification must be conditional.');
+assert(workflow.phases.find((phase) => phase.id === 'handoff')?.required === false, 'Handoff must be conditional.');
 assert(syncTargets.version === 1, 'Unexpected sync target version.');
 assert(Array.isArray(syncTargets.targets) && syncTargets.targets.length > 0, 'No sync targets configured.');
 
