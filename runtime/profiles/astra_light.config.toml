@@ -1,0 +1,5 @@
+# ~/.codex/astra_light.config.toml
+# Display label: Astra Light
+# Use for routine implementation, documentation, triage, and verification.
+model = "gpt-6-astra"
+model_reasoning_effort = "low"
