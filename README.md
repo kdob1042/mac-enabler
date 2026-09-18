@@ -54,6 +54,22 @@ mac-enabler/
 └── test/
 ```
 
+## 端末側のCodex設定
+
+本体設定は各repoへ同期せず、利用端末の `~/.codex/` に置きます。
+
+- `runtime/base-config.snippet.toml`：`config.toml`へ手動で反映する共通デフォルト
+- `runtime/profiles/*.config.toml`：CLIの `--profile` で選ぶモデル・推論量
+- `scripts/install-codex-profiles.mjs`：プロフィールだけを `CODEX_HOME`（既定は `~/.codex`）へ導入
+
+既存の `config.toml`、認証、履歴、ログ、キャッシュは自動上書きしません。プロフィールを導入する場合は次を実行します。
+
+```bash
+npm run codex:profiles -- --install
+```
+
+既存プロフィールを中央正本で置き換える場合だけ `--force` を追加します。置換前にはバックアップを作成します。
+
 ## 任意のルーティング補助
 
 必要なときだけ、作業種別から能力プロファイルを確認できます。
