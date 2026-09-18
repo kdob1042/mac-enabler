@@ -8,27 +8,27 @@
   "profiles": {
     "luna_max": {
       "display_name": "Luna Max",
-      "cost_tier": "low",
+      "cost_tier": "maximum",
       "purpose": "既存ソースとの関係の解析、変更箇所の特定、分類、状態確認、簡単な実装",
-      "reasoning_depth": "low"
+      "reasoning_depth": "maximum"
     },
     "astra_light": {
       "display_name": "Astra Light",
-      "cost_tier": "maximum",
+      "cost_tier": "low",
       "purpose": "難しい設計、難しい実装、重大な破壊リスクを伴う判断",
-      "reasoning_depth": "maximum"
+      "reasoning_depth": "light"
     }
   },
   "bindings": {
     "luna_max": {
       "cli_profile": "luna_max",
       "model": "gpt-5.6-luna",
-      "reasoning_effort": "low"
+      "reasoning_effort": "xhigh"
     },
     "astra_light": {
       "cli_profile": "astra_light",
       "model": "gpt-6-astra",
-      "reasoning_effort": "xhigh"
+      "reasoning_effort": "low"
     }
   },
   "phase_profiles": {
