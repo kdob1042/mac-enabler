@@ -4,23 +4,25 @@
   "phases": [
     {
       "id": "classify",
-      "required": true,
+      "required": false,
       "output": [
         "task_type",
         "route",
         "profile",
         "risk"
-      ]
+      ],
+      "when": "Use when the task needs explicit model/profile selection or risk classification."
     },
     {
       "id": "plan",
-      "required": true,
+      "required": false,
       "output": [
         "scope",
         "source_of_truth",
         "acceptance_conditions",
         "next_action"
-      ]
+      ],
+      "when": "Use when scope, source of truth, or acceptance conditions are not already clear."
     },
     {
       "id": "implement",
@@ -42,14 +44,31 @@
     },
     {
       "id": "handoff",
-      "required": true,
+      "required": false,
       "output": [
         "handoff_packet",
         "next_action",
         "current_branch_or_pr"
-      ]
+      ],
+      "when": "Use before compaction or when work moves to another session or agent."
     }
   ],
+  "model_selection": {
+    "source_analysis": {
+      "profile": "luna_max",
+      "purpose": "Read the existing source, trace relationships, and locate the change points before writing code."
+    },
+    "compaction_boundary": {
+      "before": "Save the current analysis, scope, changed files if any, tests, remaining work, and next action to a durable Issue or PR handoff.",
+      "after": "Read the latest handoff and re-evaluate implementation difficulty before selecting the implementation profile."
+    },
+    "implementation": {
+      "simple": "luna_max",
+      "difficult": "astra_light"
+    },
+    "verification": "luna_max",
+    "risk_override": "Use astra_light for destructive, production, migration, credential, or public-contract risk."
+  },
   "source_of_truth": {
     "user_scope": "The current explicit user request",
     "project_rules": "The target repository root and applicable nested AGENTS.md files",
@@ -68,7 +87,7 @@
     "repository_cannot_force_host_compaction": true,
     "before_compaction": [
       "Save the handoff packet to the Issue or PR, or to the repository-approved durable location.",
-      "Record the selected route and model profile.",
+      "Record the selected route and model profile when one was used.",
       "Record changed files, tests, failures, remaining work, and the exact next action.",
       "Record unresolved choices instead of silently deciding them."
     ],
@@ -81,14 +100,16 @@
     "required_packet_fields": [
       "goal",
       "scope_and_constraints",
-      "route_and_profile",
       "source_of_truth",
       "current_branch_or_pr",
       "changed_files",
       "tests_and_results",
       "remaining_work",
-      "unresolved_decisions",
       "next_action"
+    ],
+    "optional_packet_fields": [
+      "route_and_profile",
+      "unresolved_decisions"
     ]
   },
   "completion_gate": [

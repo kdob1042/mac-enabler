@@ -1,32 +1,39 @@
 # mac-enabler
 
-複数のGitHubリポジトリを、Codex・ChatGPT Work・Cloud Agentで一貫した手順に乗せるための共通運用レイヤーです。
+Codex・ChatGPT Work・Cloud Agentで使う共通運用を、必要な範囲だけ管理するリポジトリです。
 
-これはプロジェクトの生成元ではありません。プロジェクト固有のコードや設計は各リポジトリに残し、ここでは次だけを共通化します。
+プロジェクトのコード、設計、ブランチ、テスト、データの正本ではありません。各プロジェクトの正本は、それぞれのリポジトリに残します。
 
-- 作業種別からモデル能力を選ぶルーティングポリシー
-- Issue／PRを正本にした作業フェーズ
-- `compact`／コンパクション前後の引き継ぎ
-- 既存の `AGENTS.md` と共存するための管理ブロック
-- ローカルの兄弟リポジトリへ適用する同期スクリプト
+## 管理境界
 
-## 重要な制約
+| 対象 | 正本 | 各リポジトリへの同期 |
+| --- | --- | --- |
+| Codex本体のモデル・承認・sandbox設定 | 利用端末の `~/.codex/` | しない |
+| 個人共通の短いエージェント指示 | 利用端末のユーザー領域 | しない |
+| 成熟した共通Skill | Codex／Cursorのユーザー領域またはプラグイン | 原則しない |
+| プロジェクト固有の指示・コマンド・検証 | 各リポジトリの `AGENTS.md`、docs、scripts、CI | そのrepoで管理 |
+| Cloud Agentが必ず読む最小の共通運用 | 各対象repoのルート `AGENTS.md` の管理ブロック | 明示した対象だけ |
+| 新規repo用のIssue／PR／Project自動化 | `dev-template` | テンプレートとして利用 |
 
-`mac-enabler` をGitHubに置いただけでは、他のリポジトリのCodexやCloud Agentが自動的にこのリポジトリを読み込むことはありません。
+`mac-enabler`をGitHubに置いただけで、他のrepoのエージェントが自動的に読み込むことはありません。一方で、すべてのrepoへ中央設定のスナップショットを配る必要もありません。
 
-そのため、対象リポジトリへ次のスナップショットをコミットします。
+このrepoから対象repoへ同期するのは、Cloud Agentなどがそのrepo内で自動的に読む必要がある短い `AGENTS.md` 管理ブロックだけです。モデルルーティング、workflow設定、コンパクション文書を `.codex/mac-enabler/` として配布しません。
 
-- ルート `AGENTS.md` の `MAC-ENABLER` 管理ブロック
-- `.codex/mac-enabler/model-routing.json`
-- `.codex/mac-enabler/workflow.json`
-- `.codex/mac-enabler/compact-protocol.md`
+## 責務分担
 
-ローカル環境では、兄弟リポジトリを指定して同期できます。Cloud Agentでは兄弟ディレクトリを前提にせず、同期結果を対象リポジトリ自身へコミットしてください。
+- `mac-enabler`：共通運用の設計、端末セットアップスクリプト、任意のルーティング補助、同期スクリプト
+- `dev-template`：新規repo向けのIssue／PR／Project自動化テンプレート
+- 各プロジェクトrepo：固有の設計、ブランチ、テスト、データ、受入条件
+- 利用端末：Codex本体のモデル、推論量、承認、sandbox、サブエージェント上限
 
 ## 構成
 
 ```text
 mac-enabler/
+├── .github/
+│   ├── sync-targets.json
+│   └── workflows/
+│       └── sync-targets.yml
 ├── AGENTS.md
 ├── config/
 │   ├── model-routing.json
@@ -34,76 +41,127 @@ mac-enabler/
 ├── docs/
 │   ├── compact-protocol.md
 │   └── integration.md
+├── runtime/
+│   ├── base-config.snippet.toml
+│   └── profiles/
+│       ├── astra_light.config.toml
+│       └── luna_max.config.toml
 ├── scripts/
+│   ├── install-codex-profiles.mjs
 │   ├── route-task.mjs
+│   ├── setup-codex.mjs
 │   ├── sync-agents.mjs
+│   ├── sync-repositories.mjs
 │   └── validate.mjs
-├── templates/
-│   ├── project-profile.example.json
-│   └── shared-agents-block.md
 └── test/
 ```
 
-## 使い方
+## 端末側のCodex設定
 
-### 1. ルートを決める
+本体設定は各repoへ同期せず、利用端末の `~/.codex/` に置きます。モデルプロファイルは次の2つだけを管理します。
 
-タスクをそのまま実装に投げず、まずルーターへ渡します。
+| CLI profile | 表示名 | モデル設定 | 主な用途 |
+| --- | --- | --- | --- |
+| `luna_max` | Luna Max | `gpt-5.6-luna` / `xhigh` | 既存ソース解析、変更箇所の特定、簡単な実装 |
+| `astra_light` | Astra Light | `gpt-6-astra` / `low` | 難しい設計、難しい実装、重大なリスク |
 
-```bash
-node scripts/route-task.mjs --task "設計を見直して実装方針を決める"
-node scripts/route-task.mjs --json --task "Issueの状態を確認して一覧化する"
-```
+### Codexが実行するセットアップ
 
-出力される `profile` は、利用するモデル能力の目安です。
-
-- `fast`: 分類、抽出、単純な整形、状態確認
-- `balanced`: 通常の実装、文書更新、通常の検証
-- `strong`: 複雑な実装、レビュー、障害対応、データ移行
-- `max`: アーキテクチャ、正本設計、重大な破壊リスクを伴う判断
-
-このスクリプトは現在の会話のモデルを強制変更しません。API／CLI／SDKなど呼び出し側でモデルを切り替える場合は、`binding_env` を使ってプロファイルをモデルIDへ対応付けます。ChatGPT WorkやCloud Agentで切り替えができない場合でも、作業開始時に選択されたプロファイルを明示します。
-
-### 2. 対象リポジトリへ同期する
-
-兄弟ディレクトリが次のようになっている場合：
-
-```text
-github/
-├── mac-enabler/
-└── manga-mac/
-```
+`mac-enabler`をcloneしたあと、Codex自身に次のスクリプトを実行させれば、端末側のプロフィールを取り込めます。
 
 ```bash
-node scripts/sync-agents.mjs --target ../manga-mac
+cd <mac-enabler-dir>
+npm run codex:setup -- --install
 ```
 
-変更せずに差分だけ確認するには：
+確認だけ行う場合：
 
 ```bash
-node scripts/sync-agents.mjs --target ../manga-mac --check
+npm run codex:setup -- --check
 ```
 
-同期スクリプトは、対象リポジトリの既存 `AGENTS.md` を保持したまま管理ブロックだけを追加・更新します。配下の `AGENTS.md` は削除・上書きしません。
+作業時の起動例：
 
-### 3. 通常の作業順
+```bash
+codex --profile astra_light
+codex --profile luna_max
+```
 
-1. タスクを分類し、ルートとモデルプロファイルを決める
-2. Issue／PR、対象ブランチ、受入条件を確認する
-3. 対象リポジトリの `AGENTS.md` と設計の正本を読む
-4. 小さな作業単位で実装する
-5. 必要最小限の検証を実行する
-6. Issue／PRへ検証結果と残件を書く
-7. コンパクションまたは引き継ぎの前に、引き継ぎパケットを保存する
+### プロフィールの起動主体
 
-## AGENTS.mdの責務分離
+セットアップは、ユーザーが端末で実行しても、端末上でシェル操作が許可されたCodex CLIに実行を依頼しても構いません。ただし、`codex --profile ...` は起動時の指定です。すでに動いているCodex自身が、そのプロセスのモデルを後から切り替えるコマンドではありません。別のプロファイルを使う場合は、ユーザーまたは外側のランチャーが、そのプロファイルで新しいCodex CLIプロセスを起動します。
 
-- 共通管理ブロック：作業手順、ルーティング、コンパクション、引き継ぎ
-- 対象リポジトリのルート `AGENTS.md`：プロジェクト固有の設計・ブランチ・テスト・正本
-- 配下の `AGENTS.md`：ディレクトリ固有の制約
-- Issue／PR：現在の作業状態、受入条件、検証結果、残件
+ルーターとこの指針は、作業段階ごとにどのプロファイルを選ぶかを固定するためにあります。ルーターは `codex_profile` を出力しますが、モデル切り替え自体はCLIの起動側が行います。ChatGPT Workの画面から、ユーザー端末上のCLIを自動起動・切替するものではありません。
 
-同じ仕様を複数箇所へ全文転載しません。共通ルールとプロジェクトルールが衝突した場合、プロジェクトの事実・ブランチ・検証条件は対象リポジトリ側を優先し、解決できない場合は推測で進めず差分を報告します。
+`--force`を付けた場合だけ既存の同名プロフィールを置き換え、置換前にバックアップを作成します。`config.toml`、認証、履歴、ログ、キャッシュはこのスクリプトでは変更しません。
+
+承認、sandbox、サブエージェント上限などの共通デフォルトを反映する場合は、`runtime/base-config.snippet.toml` の内容を利用端末の `~/.codex/config.toml` へ、既存設定を確認しながら手動で統合します。セットアップスクリプトは既存設定の破壊を避けるため、そこへ自動追記しません。
+
+このセットアップは端末側のCodex用です。Cursorのモデル選択やCursor固有の設定を、このrepoから自動変更するものではありません。
+
+## 任意のルーティング補助
+
+基本導線は、Lunaで既存ソースを解析して変更箇所を特定し、必要ならコンパクションを挟み、その後の実装難易度で再選択する流れです。
+
+1. 既存ソースとの関係・変更箇所の特定：`luna_max`
+2. Issue／PRへ状態を保存し、必要ならコンパクション
+3. 難しい設計・実装：`astra_light`
+4. 簡単な実装：`luna_max`
+
+ルーターはこの判断を補助します。
+
+```bash
+node scripts/route-task.mjs --phase source_analysis --task "既存ソースとの関係と変更箇所を特定する"
+node scripts/route-task.mjs --phase implementation --task "難しい実装を行う"
+node scripts/route-task.mjs --phase implementation --task "小さな文言修正を実装する"
+```
+
+出力された `codex_profile` を `codex --profile <name>` に渡します。ChatGPT Workの画面上のモデル切り替えをスクリプトが強制するものではありません。
+
+## 明示対象repoへの同期
+
+同期対象は `.github/sync-targets.json` の許可リストです。現在は次の2種類を想定します。
+
+- `dev-template`：新規repoへ配るテンプレートの共通ブロックを更新する
+- Cloud Agentで共通ブロックが必要な既存repo：必要なrepoだけ登録する
+
+対象repoに対して同期されるのは、既存のルート `AGENTS.md` と共存する管理ブロックだけです。既存本文と配下の `AGENTS.md` は変更しません。
+
+ローカルの兄弟repoへ適用する場合：
+
+```bash
+node scripts/sync-agents.mjs --target ../target-repository
+node scripts/sync-agents.mjs --target ../target-repository --check
+```
+
+`--check` は変更が必要なら終了コード1になります。
+
+旧方式で作られた対象repo内の `.codex/mac-enabler/` スナップショットは、プロジェクト固有の設定ではないため、未マージの同期PRは閉じ、マージ済みのものだけ対象repo側で削除PRを作ります。既存のプロジェクト固有 `AGENTS.md` 本文、docs、scripts、CIは削除しません。
+
+## 自動同期
+
+`mac-enabler`の`main`へ共通ブロックをマージすると、`.github/sync-targets.json`に明示された対象repoへ更新PRを作成します。
+
+Workflowは次を行います。
+
+1. 対象repoの指定ベースブランチをcloneする
+2. ルート `AGENTS.md` の管理ブロックだけを更新する
+3. 指定された同期ブランチへpushする
+4. 既存PRがあれば更新し、なければ新規PRを作る
+
+モデル設定やプロジェクト固有のファイルは変更しません。対象repoを増やす場合は、Cloud Agentなどでrepo内の共通ブロックが必要かを確認してから `.github/sync-targets.json` に登録します。
+
+Workflowには対象repoへpushとPR作成ができる `MAC_ENABLER_SYNC_TOKEN` Repository secret が必要です。未設定の状態は同期成功とは扱いません。
+
+## 通常の作業順
+
+1. 対象リポジトリの `AGENTS.md`、Issue／PR、設計の正本を読む
+2. Lunaで既存ソースとの関係、変更箇所、影響範囲を特定する
+3. 変更範囲と受入条件を決め、必要ならコンパクション用の引き継ぎを保存する
+4. コンパクション後に実装難易度を再判定する
+5. 難しい設計・実装はAstra、簡単な実装はLunaで行う
+6. 変更範囲を満たす最小の検証を行う
+7. 未実行の検証と理由をIssue／PRへ残す
 
 ## 検証
 

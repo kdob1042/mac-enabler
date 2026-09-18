@@ -10,6 +10,21 @@
 - `mac-enabler` が保証するのは、コンパクション前に再開に必要な状態を保存する手順である。
 - モデルの切り替えも、現在のUIが自動ルーティングを提供しない場合は強制できない。ルーターは必要能力と選択プロファイルを決める。
 
+## 基本のモデル導線
+
+1. まず `luna_max` で既存ソースとの関係、変更箇所、影響範囲を解析する。
+2. 実装へ移る前に、作業状態を保存して必要ならコンパクションする。
+3. コンパクション後に実装難易度を再判定し、難しい設計・実装なら `astra_light`、簡単なら `luna_max` を使う。
+4. 破壊的変更、本番、移行、認証情報、公開契約に関わる場合は、難易度にかかわらず `astra_light` を使う。
+
+ルーターを使う場合の例：
+
+```bash
+node scripts/route-task.mjs --phase source_analysis --task "既存ソースとの関係と変更箇所を特定する"
+node scripts/route-task.mjs --phase implementation --task "難しい実装を行う"
+node scripts/route-task.mjs --phase implementation --task "小さな文言修正を実装する"
+```
+
 ## コンパクション前
 
 次の情報を、Issueコメント・PR本文／コメントなど対象リポジトリで定めた永続的な場所へ保存する。
