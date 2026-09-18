@@ -62,8 +62,8 @@ mac-enabler/
 
 | CLI profile | 表示名 | モデル設定 | 主な用途 |
 | --- | --- | --- | --- |
-| `astra_light` | Astra Light | `gpt-6-astra` / `low` | 通常の実装、文書、分類、検証 |
-| `luna_max` | Luna Max | `gpt-5.6-luna` / `xhigh` | 設計、レビュー、障害、移行、破壊リスク |
+| `luna_max` | Luna Max | `gpt-5.6-luna` / `low` | 既存ソース解析、変更箇所の特定、簡単な実装 |
+| `astra_light` | Astra Light | `gpt-6-astra` / `xhigh` | 難しい設計、難しい実装、重大なリスク |
 
 ### Codexが実行するセットアップ
 
@@ -95,11 +95,19 @@ codex --profile luna_max
 
 ## 任意のルーティング補助
 
-必要なときだけ、作業種別から2つのプロファイルのどちらを使うか確認できます。
+基本導線は、Lunaで既存ソースを解析して変更箇所を特定し、必要ならコンパクションを挟み、その後の実装難易度で再選択する流れです。
+
+1. 既存ソースとの関係・変更箇所の特定：`luna_max`
+2. Issue／PRへ状態を保存し、必要ならコンパクション
+3. 難しい設計・実装：`astra_light`
+4. 簡単な実装：`luna_max`
+
+ルーターはこの判断を補助します。
 
 ```bash
-node scripts/route-task.mjs --task "設計を見直して実装方針を決める"
-node scripts/route-task.mjs --json --task "Issueの状態を一覧化する"
+node scripts/route-task.mjs --phase source_analysis --task "既存ソースとの関係と変更箇所を特定する"
+node scripts/route-task.mjs --phase implementation --task "難しい実装を行う"
+node scripts/route-task.mjs --phase implementation --task "小さな文言修正を実装する"
 ```
 
 出力された `codex_profile` を `codex --profile <name>` に渡します。ChatGPT Workの画面上のモデル切り替えをスクリプトが強制するものではありません。
@@ -142,11 +150,12 @@ Workflowには対象repoへpushとPR作成ができる `MAC_ENABLER_SYNC_TOKEN` 
 ## 通常の作業順
 
 1. 対象リポジトリの `AGENTS.md`、Issue／PR、設計の正本を読む
-2. 変更範囲と受入条件を決める
-3. 必要な実装を行う
-4. 変更範囲を満たす最小の検証を行う
-5. 未実行の検証と理由をIssue／PRへ残す
-6. コンパクションまたは引き継ぎの前に、永続的な引き継ぎ記録を保存する
+2. Lunaで既存ソースとの関係、変更箇所、影響範囲を特定する
+3. 変更範囲と受入条件を決め、必要ならコンパクション用の引き継ぎを保存する
+4. コンパクション後に実装難易度を再判定する
+5. 難しい設計・実装はAstra、簡単な実装はLunaで行う
+6. 変更範囲を満たす最小の検証を行う
+7. 未実行の検証と理由をIssue／PRへ残す
 
 ## 検証
 
