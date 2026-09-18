@@ -9,6 +9,7 @@ Codex・ChatGPT Work・Cloud Agentで使う共通運用を、必要な範囲だ�
 | 対象 | 正本 | 各リポジトリへの同期 |
 | --- | --- | --- |
 | Codex本体のモデル・承認・sandbox設定 | 利用端末の `~/.codex/` | しない |
+| Cursor CLIのモデル・権限・表示設定 | 利用端末の `~/.cursor/cli-config.json` | しない |
 | 個人共通の短いエージェント指示 | 利用端末のユーザー領域 | しない |
 | 成熟した共通Skill | Codex／Cursorのユーザー領域またはプラグイン | 原則しない |
 | プロジェクト固有の指示・コマンド・検証 | 各リポジトリの `AGENTS.md`、docs、scripts、CI | そのrepoで管理 |
@@ -21,7 +22,7 @@ Codex・ChatGPT Work・Cloud Agentで使う共通運用を、必要な範囲だ�
 
 ## 責務分担
 
-- `mac-enabler`：共通運用の設計、端末セットアップスクリプト、任意のルーティング補助、同期スクリプト
+- `mac-enabler`：共通運用の設計、端末セットアップスクリプト（Codex／Cursor）、任意のルーティング補助、同期スクリプト
 - `dev-template`：新規repo向けのIssue／PR／Project自動化テンプレート
 - 各プロジェクトrepo：固有の設計、ブランチ、テスト、データ、受入条件
 - 利用端末：Codex本体のモデル、推論量、承認、sandbox、サブエージェント上限
@@ -43,6 +44,8 @@ mac-enabler/
 │   └── integration.md
 ├── runtime/
 │   ├── base-config.snippet.toml
+│   ├── cursor/
+│   │   └── cli-config.json
 │   └── profiles/
 │       ├── astra_light.config.toml
 │       └── luna_max.config.toml
@@ -50,6 +53,7 @@ mac-enabler/
 │   ├── install-codex-profiles.mjs
 │   ├── route-task.mjs
 │   ├── setup-codex.mjs
+│   ├── setup-cursor.mjs
 │   ├── sync-agents.mjs
 │   ├── sync-repositories.mjs
 │   └── validate.mjs
@@ -98,6 +102,27 @@ codex --profile luna_max
 承認、sandbox、サブエージェント上限などの共通デフォルトを反映する場合は、`runtime/base-config.snippet.toml` の内容を利用端末の `~/.codex/config.toml` へ、既存設定を確認しながら手動で統合します。セットアップスクリプトは既存設定の破壊を避けるため、そこへ自動追記しません。
 
 このセットアップは端末側のCodex用です。Cursorのモデル選択やCursor固有の設定を、このrepoから自動変更するものではありません。
+
+## 端末側のCursor CLI設定
+
+Cursor CLIのグローバル設定は `~/.cursor/cli-config.json` で管理します。mac-enablerは、Cursor公式のCLI設定形式に合わせた権限・表示デフォルトを、既存設定を保持しながら一度に導入します。
+
+```bash
+npm run cursor:setup -- --install
+```
+
+確認だけ行う場合：
+
+```bash
+npm run cursor:setup -- --check
+```
+
+既存設定を管理値へ更新する場合だけ `--force` を付けます。更新前にバックアップを作成し、ユーザー独自の未管理フィールドと権限項目は保持します。`CURSOR_CONFIG_DIR` または `--cursor-config-dir PATH` で導入先を変更できます。
+
+このスクリプトはCursor CLIの設定、認証、IDEの個人設定、Cloud Agent／Grok Botの設定を同時に変更するものではありません。モデル選択はCursor側の `/model` または利用環境で行います。
+
+Cursor公式のプロジェクト規約入口は各repoの `AGENTS.md` です。共通規約のrepo配布はPR #3の短い管理ブロックに限定します。
+
 
 ## 任意のルーティング補助
 
