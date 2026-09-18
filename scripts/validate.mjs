@@ -24,8 +24,8 @@ assert(routing.profiles.astra_light && routing.profiles.luna_max, 'Both Astra Li
 assert(!routing.profiles.cheap && !routing.profiles.balanced && !routing.profiles.strong && !routing.profiles.max, 'Legacy capability profiles must be removed.');
 assert(routing.phase_profiles.source_analysis === 'luna_max', 'Source analysis must use Luna Max.');
 assert(routing.phase_profiles.implementation === 'luna_max', 'Simple implementation must default to Luna Max.');
-assert(routing.bindings.astra_light.reasoning_effort === 'xhigh', 'Difficult work must use Astra Light at maximum reasoning.');
-assert(routing.bindings.luna_max.reasoning_effort === 'low', 'Routine work must use Luna Max at low reasoning.');
+assert(routing.bindings.astra_light.reasoning_effort === 'low', 'Astra Light binding failed.');
+assert(routing.bindings.luna_max.reasoning_effort === 'xhigh', 'Luna Max binding failed.');
 assert(workflow.phases.find((phase) => phase.id === 'classify')?.required === false, 'Classification must be conditional.');
 assert(workflow.phases.find((phase) => phase.id === 'handoff')?.required === false, 'Handoff must be conditional.');
 assert(syncTargets.version === 1, 'Unexpected sync target version.');
