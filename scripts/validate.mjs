@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadRoutingConfig, routeTask } from './route-task.mjs';
@@ -39,6 +39,10 @@ for (const target of syncTargets.targets) {
 assert(new Set(routing.profile_order).size === routing.profile_order.length, 'Duplicate profiles.');
 for (const route of routing.routes) {
   assert(routing.profiles[route.profile], 'Unknown route profile: ' + route.id);
+}
+for (const [profile, binding] of Object.entries(routing.bindings)) {
+  assert(binding.cli_profile && binding.model && binding.reasoning_effort, 'Incomplete binding: ' + profile);
+  await stat(path.join(ROOT, 'runtime', 'profiles', binding.cli_profile + '.config.toml'));
 }
 assert(template.includes('<!-- MAC-ENABLER:BEGIN -->'), 'Missing managed block start.');
 assert(template.includes('<!-- MAC-ENABLER:END -->'), 'Missing managed block end.');
