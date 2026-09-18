@@ -1,5 +1,5 @@
 # ~/.codex/astra_light.config.toml
 # Display label: Astra Light
-# Use for routine implementation, documentation, triage, and verification.
+# Use for difficult design and difficult implementation.
 model = "gpt-6-astra"
-model_reasoning_effort = "low"
+model_reasoning_effort = "xhigh"
