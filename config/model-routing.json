@@ -2,39 +2,65 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": 1,
   "profile_order": [
-    "astra_light",
-    "luna_max"
+    "luna_max",
+    "astra_light"
   ],
   "profiles": {
-    "astra_light": {
-      "display_name": "Astra Light",
-      "cost_tier": "low",
-      "purpose": "通常の実装、文書更新、分類、状態確認、通常の検証",
-      "reasoning_depth": "low"
-    },
     "luna_max": {
       "display_name": "Luna Max",
+      "cost_tier": "low",
+      "purpose": "既存ソースとの関係の解析、変更箇所の特定、分類、状態確認、簡単な実装",
+      "reasoning_depth": "low"
+    },
+    "astra_light": {
+      "display_name": "Astra Light",
       "cost_tier": "maximum",
-      "purpose": "アーキテクチャ、レビュー、障害対応、移行、重大な破壊リスクを伴う判断",
+      "purpose": "難しい設計、難しい実装、重大な破壊リスクを伴う判断",
       "reasoning_depth": "maximum"
     }
   },
   "bindings": {
-    "astra_light": {
-      "cli_profile": "astra_light",
-      "model": "gpt-6-astra",
-      "reasoning_effort": "low"
-    },
     "luna_max": {
       "cli_profile": "luna_max",
       "model": "gpt-5.6-luna",
+      "reasoning_effort": "low"
+    },
+    "astra_light": {
+      "cli_profile": "astra_light",
+      "model": "gpt-6-astra",
       "reasoning_effort": "xhigh"
     }
   },
+  "phase_profiles": {
+    "source_analysis": "luna_max",
+    "architecture": "astra_light",
+    "implementation": "luna_max",
+    "verification": "luna_max",
+    "handoff": "luna_max"
+  },
   "routes": [
     {
-      "id": "architecture",
+      "id": "source-analysis",
       "profile": "luna_max",
+      "keywords": [
+        "source analysis",
+        "existing source",
+        "trace",
+        "locate",
+        "impact",
+        "既存ソース",
+        "コードを読む",
+        "変更箇所",
+        "影響範囲",
+        "関連箇所",
+        "依存関係",
+        "探索",
+        "解析"
+      ]
+    },
+    {
+      "id": "architecture",
+      "profile": "astra_light",
       "keywords": [
         "architecture",
         "design",
@@ -47,7 +73,21 @@
       ]
     },
     {
-      "id": "incident",
+      "id": "complex-implementation",
+      "profile": "astra_light",
+      "keywords": [
+        "complex implementation",
+        "difficult implementation",
+        "large refactor",
+        "複雑な実装",
+        "難しい実装",
+        "大規模改修",
+        "大規模な変更",
+        "複雑なリファクタリング"
+      ]
+    },
+    {
+      "id": "incident-analysis",
       "profile": "luna_max",
       "keywords": [
         "incident",
@@ -61,7 +101,7 @@
       ]
     },
     {
-      "id": "review",
+      "id": "review-analysis",
       "profile": "luna_max",
       "keywords": [
         "review",
@@ -74,21 +114,19 @@
     },
     {
       "id": "implementation",
-      "profile": "astra_light",
+      "profile": "luna_max",
       "keywords": [
         "implement",
         "implementation",
         "feature",
-        "refactor",
         "実装",
         "改修",
-        "リファクタリング",
         "機能追加"
       ]
     },
     {
       "id": "verification",
-      "profile": "astra_light",
+      "profile": "luna_max",
       "keywords": [
         "test",
         "verify",
@@ -100,7 +138,7 @@
     },
     {
       "id": "documentation",
-      "profile": "astra_light",
+      "profile": "luna_max",
       "keywords": [
         "document",
         "docs",
@@ -112,7 +150,7 @@
     },
     {
       "id": "triage",
-      "profile": "astra_light",
+      "profile": "luna_max",
       "keywords": [
         "triage",
         "classify",
@@ -127,7 +165,7 @@
     },
     {
       "id": "handoff",
-      "profile": "astra_light",
+      "profile": "luna_max",
       "keywords": [
         "handoff",
         "checkpoint",
@@ -141,7 +179,7 @@
   "guardrails": [
     {
       "id": "data-loss-or-production",
-      "minimum_profile": "luna_max",
+      "minimum_profile": "astra_light",
       "keywords": [
         "production",
         "本番",
@@ -160,7 +198,7 @@
     },
     {
       "id": "migration-or-public-contract",
-      "minimum_profile": "luna_max",
+      "minimum_profile": "astra_light",
       "keywords": [
         "migration",
         "migrate",
@@ -175,10 +213,10 @@
   ],
   "fallback": {
     "route": "implementation",
-    "profile": "astra_light"
+    "profile": "luna_max"
   },
   "enforcement": {
-    "policy": "The router selects one of two capability profiles; the caller maps that profile to an actual model.",
+    "policy": "Use Luna Max for source analysis and simple implementation; after compaction, use Astra Light for difficult design or implementation and Luna Max for simple implementation.",
     "chatgpt_work": "Model selection may remain manual. Declare the profile instead of pretending that a switch occurred.",
     "cli_or_sdk": "Map the selected CLI profile to a configured model ID before starting the task."
   }
