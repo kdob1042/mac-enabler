@@ -1,6 +1,6 @@
 # mac-enabler
 
-Codex・ChatGPT Work・Cloud Agentで使う共通運用を、必要な範囲だけ管理するためのリポジトリです。
+Codex・ChatGPT Work・Cloud Agentで使う共通運用を、必要な範囲だけ管理するリポジトリです。
 
 プロジェクトのコード、設計、ブランチ、テスト、データの正本ではありません。各プロジェクトの正本は、それぞれのリポジトリに残します。
 
@@ -21,12 +21,10 @@ Codex・ChatGPT Work・Cloud Agentで使う共通運用を、必要な範囲だ�
 
 ## 責務分担
 
-- `mac-enabler`：共通運用の設計、短い管理ブロック、任意のルーティング補助、同期スクリプト
+- `mac-enabler`：共通運用の設計、端末セットアップスクリプト、任意のルーティング補助、同期スクリプト
 - `dev-template`：新規repo向けのIssue／PR／Project自動化テンプレート
 - 各プロジェクトrepo：固有の設計、ブランチ、テスト、データ、受入条件
 - 利用端末：Codex本体のモデル、推論量、承認、sandbox、サブエージェント上限
-
-`config/model-routing.json` は作業種別と必要能力を整理する補助資料です。現在のChatGPT／Codex画面のモデルを自動で切り替える設定ではありません。毎回の作業で必ず分類することも要求しません。
 
 ## 構成
 
@@ -43,43 +41,68 @@ mac-enabler/
 ├── docs/
 │   ├── compact-protocol.md
 │   └── integration.md
+├── runtime/
+│   ├── base-config.snippet.toml
+│   └── profiles/
+│       ├── astra_light.config.toml
+│       └── luna_max.config.toml
 ├── scripts/
+│   ├── install-codex-profiles.mjs
 │   ├── route-task.mjs
+│   ├── setup-codex.mjs
 │   ├── sync-agents.mjs
 │   ├── sync-repositories.mjs
 │   └── validate.mjs
-├── templates/
-│   ├── project-profile.example.json
-│   └── shared-agents-block.md
 └── test/
 ```
 
 ## 端末側のCodex設定
 
-本体設定は各repoへ同期せず、利用端末の `~/.codex/` に置きます。
+本体設定は各repoへ同期せず、利用端末の `~/.codex/` に置きます。モデルプロファイルは次の2つだけを管理します。
 
-- `runtime/base-config.snippet.toml`：`config.toml`へ手動で反映する共通デフォルト
-- `runtime/profiles/*.config.toml`：CLIの `--profile` で選ぶモデル・推論量（`cheap`／`balanced`／`review`／`deep`）
-- `scripts/install-codex-profiles.mjs`：プロフィールだけを `CODEX_HOME`（既定は `~/.codex`）へ導入
+| CLI profile | 表示名 | モデル設定 | 主な用途 |
+| --- | --- | --- | --- |
+| `astra_light` | Astra Light | `gpt-6-astra` / `low` | 通常の実装、文書、分類、検証 |
+| `luna_max` | Luna Max | `gpt-5.6-luna` / `xhigh` | 設計、レビュー、障害、移行、破壊リスク |
 
-既存の `config.toml`、認証、履歴、ログ、キャッシュは自動上書きしません。プロフィールを導入する場合は次を実行します。
+### Codexが実行するセットアップ
+
+`mac-enabler`をcloneしたあと、Codex自身に次のスクリプトを実行させれば、端末側のプロフィールを取り込めます。
 
 ```bash
-npm run codex:profiles -- --install
+cd <mac-enabler-dir>
+npm run codex:setup -- --install
 ```
 
-既存プロフィールを中央正本で置き換える場合だけ `--force` を追加します。置換前にはバックアップを作成します。
+確認だけ行う場合：
+
+```bash
+npm run codex:setup -- --check
+```
+
+作業時の起動例：
+
+```bash
+codex --profile astra_light
+codex --profile luna_max
+```
+
+`--force`を付けた場合だけ既存の同名プロフィールを置き換え、置換前にバックアップを作成します。`config.toml`、認証、履歴、ログ、キャッシュはこのスクリプトでは変更しません。
+
+承認、sandbox、サブエージェント上限などの共通デフォルトを反映する場合は、`runtime/base-config.snippet.toml` の内容を利用端末の `~/.codex/config.toml` へ、既存設定を確認しながら手動で統合します。セットアップスクリプトは既存設定の破壊を避けるため、そこへ自動追記しません。
+
+このセットアップは端末側のCodex用です。Cursorのモデル選択やCursor固有の設定を、このrepoから自動変更するものではありません。
 
 ## 任意のルーティング補助
 
-必要なときだけ、作業種別から能力プロファイルを確認できます。
+必要なときだけ、作業種別から2つのプロファイルのどちらを使うか確認できます。
 
 ```bash
 node scripts/route-task.mjs --task "設計を見直して実装方針を決める"
 node scripts/route-task.mjs --json --task "Issueの状態を一覧化する"
 ```
 
-出力は `cheap`、`balanced`、`strong`、`max` の能力目安と、対応するCodex CLIプロフィールを返します。必要なら、出力された `codex_profile` を `codex --profile <name>` に渡します。モデル選択を自動強制する機能ではありません。
+出力された `codex_profile` を `codex --profile <name>` に渡します。ChatGPT Workの画面上のモデル切り替えをスクリプトが強制するものではありません。
 
 ## 明示対象repoへの同期
 
@@ -98,6 +121,8 @@ node scripts/sync-agents.mjs --target ../target-repository --check
 ```
 
 `--check` は変更が必要なら終了コード1になります。
+
+旧方式で作られた対象repo内の `.codex/mac-enabler/` スナップショットは、プロジェクト固有の設定ではないため、未マージの同期PRは閉じ、マージ済みのものだけ対象repo側で削除PRを作ります。既存のプロジェクト固有 `AGENTS.md` 本文、docs、scripts、CIは削除しません。
 
 ## 自動同期
 
