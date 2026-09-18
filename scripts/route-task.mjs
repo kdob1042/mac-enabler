@@ -23,7 +23,7 @@ function rank(config, profile) {
   return value === -1 ? 0 : value;
 }
 
-export function routeTask(task, config) {
+export function routeTask(task, config, phase = null) {
   const text = String(task ?? '').trim();
   if (!text) {
     throw new Error('A task description is required.');
@@ -60,8 +60,13 @@ export function routeTask(task, config) {
       : [];
   });
 
+  const phaseProfile = phase ? config.phase_profiles?.[phase] ?? null : null;
   let profile = selected.route.profile;
   const elevatedBy = [];
+  if (phaseProfile && rank(config, profile) < rank(config, phaseProfile)) {
+    profile = phaseProfile;
+    elevatedBy.push('phase:' + phase);
+  }
   for (const guardrail of guardrailMatches) {
     if (rank(config, profile) < rank(config, guardrail.minimum_profile)) {
       profile = guardrail.minimum_profile;
@@ -73,6 +78,8 @@ export function routeTask(task, config) {
   return {
     version: config.version,
     task: text,
+    phase,
+    phase_profile: phaseProfile,
     route: selected.route.id,
     profile,
     route_matches: selected.matched,
@@ -87,7 +94,7 @@ export function routeTask(task, config) {
 }
 
 function usage() {
-  console.log('Usage: node scripts/route-task.mjs [--json] --task "task description"');
+  console.log('Usage: node scripts/route-task.mjs [--json] [--phase PHASE] --task "task description"');
   console.log('       node scripts/route-task.mjs --list');
 }
 
@@ -106,18 +113,23 @@ async function main() {
     return;
   }
 
-  const taskIndex = args.indexOf('--task');
-  const task = taskIndex >= 0
-    ? args.slice(taskIndex + 1).filter((arg) => arg !== '--json').join(' ')
-    : args.filter((arg) => arg !== '--json').join(' ');
+  const phaseIndex = args.indexOf('--phase');
+  const phase = phaseIndex >= 0 ? args[phaseIndex + 1] : null;
+  const task = args
+    .filter((arg, index) => arg !== '--json'
+      && arg !== '--task'
+      && arg !== '--phase'
+      && (phaseIndex < 0 || index !== phaseIndex + 1))
+    .join(' ');
 
-  const result = routeTask(task, config);
+  const result = routeTask(task, config, phase);
   if (args.includes('--json')) {
     console.log(JSON.stringify(result, null, 2));
     return;
   }
 
   console.log('route: ' + result.route);
+  if (result.phase) console.log('phase: ' + result.phase);
   console.log('profile: ' + result.profile);
   console.log('codex_profile: ' + result.binding_profile);
   console.log('model: ' + result.binding_model);
