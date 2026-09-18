@@ -1,5 +1,15 @@
 # 対象リポジトリへの統合
 
+## 責務分担
+
+`mac-enabler`を共通Codex運用設定の中央正本とし、`dev-template`はIssue／PR／Project自動化を含む新規リポジトリ用テンプレートとして残します。
+
+- mac-enabler：共通のルーティング、workflow、compact、AGENTS統合、配布・同期
+- dev-template：新規repoへコピーするGitHub自動化、Issueテンプレート、Project運用
+- 各プロジェクトrepo：固有の設計、ブランチ、テスト、データ正本
+
+`dev-template`の自動化ロジックを`mac-enabler`へ複製しません。`dev-template`自体をmac-enablerの同期対象に含め、両者を一つの運用体系として更新します。
+
 ## ローカル
 
 兄弟リポジトリとして配置します。
@@ -7,6 +17,7 @@
 ```text
 github/
 ├── mac-enabler/
+├── dev-template/
 ├── manga-mac/
 ├── live-manga/
 └── nexus/
@@ -20,12 +31,26 @@ node scripts/sync-agents.mjs --target ../manga-mac
 
 同期後、対象リポジトリ側で差分を確認し、対象リポジトリの通常ルールに従ってブランチとPRを作ります。
 
+## 自動同期
+
+`.github/sync-targets.json`に対象repo、ベースブランチ、同期ブランチを登録します。
+
+`mac-enabler`の`main`へ共通設定をマージすると、`.github/workflows/sync-targets.yml`が対象repoごとに次を行います。
+
+1. 対象repoの指定ベースブランチをclone
+2. 管理ブロックと`.codex/mac-enabler/`を更新
+3. 同期ブランチへpush
+4. 既存の同期PRを更新、または新規PRを作成
+
+同期Workflowには`MAC_ENABLER_SYNC_TOKEN` secretが必要です。対象repoのContents writeとPull requests writeが必要で、private repoを含む場合は全対象repoへアクセスできるFine-grained tokenを使います。
+
 ## Cloud Agent
 
 Cloud Agentの作業ディレクトリは、ローカルの親ディレクトリや兄弟リポジトリを前提にできません。したがって対象リポジトリへ、次をコミットしておきます。
 
 - ルート `AGENTS.md` の管理ブロック
 - `.codex/mac-enabler/` の設定スナップショット
+- `dev-template`を使う新規repoでは、テンプレート由来のGitHub自動化
 
 mac-enablerだけを別リポジトリに置き、対象リポジトリから相対パスで参照する方式はCloud Agentでは成立しません。
 
