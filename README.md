@@ -59,7 +59,7 @@ mac-enabler/
 本体設定は各repoへ同期せず、利用端末の `~/.codex/` に置きます。
 
 - `runtime/base-config.snippet.toml`：`config.toml`へ手動で反映する共通デフォルト
-- `runtime/profiles/*.config.toml`：CLIの `--profile` で選ぶモデル・推論量
+- `runtime/profiles/*.config.toml`：CLIの `--profile` で選ぶモデル・推論量（`cheap`／`balanced`／`review`／`deep`）
 - `scripts/install-codex-profiles.mjs`：プロフィールだけを `CODEX_HOME`（既定は `~/.codex`）へ導入
 
 既存の `config.toml`、認証、履歴、ログ、キャッシュは自動上書きしません。プロフィールを導入する場合は次を実行します。
@@ -79,7 +79,7 @@ node scripts/route-task.mjs --task "設計を見直して実装方針を決め�
 node scripts/route-task.mjs --json --task "Issueの状態を一覧化する"
 ```
 
-出力は `cheap`、`balanced`、`strong`、`max` の能力目安です。実際のモデル選択は利用ホストまたは呼び出し側で行います。
+出力は `cheap`、`balanced`、`strong`、`max` の能力目安と、対応するCodex CLIプロフィールを返します。必要なら、出力された `codex_profile` を `codex --profile <name>` に渡します。モデル選択を自動強制する機能ではありません。
 
 ## 明示対象repoへの同期
 
