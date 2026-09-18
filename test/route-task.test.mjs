@@ -10,10 +10,10 @@ test('architecture work routes to max', () => {
   assert.equal(result.profile, 'max');
 });
 
-test('simple status work routes to fast', () => {
+test('simple status work routes to cheap', () => {
   const result = routeTask('Issueの状態を一覧化する', config);
   assert.equal(result.route, 'triage');
-  assert.equal(result.profile, 'fast');
+  assert.equal(result.profile, 'cheap');
 });
 
 test('dangerous terms elevate the profile', () => {
