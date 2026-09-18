@@ -9,6 +9,7 @@
 - `compact`／コンパクション前後の引き継ぎ
 - 既存の `AGENTS.md` と共存するための管理ブロック
 - ローカルの兄弟リポジトリへ適用する同期スクリプト
+- 対象リポジトリへ更新PRを作る自動同期
 
 ## 重要な制約
 
@@ -23,10 +24,22 @@
 
 ローカル環境では、兄弟リポジトリを指定して同期できます。Cloud Agentでは兄弟ディレクトリを前提にせず、同期結果を対象リポジトリ自身へコミットしてください。
 
+## 責務分担
+
+- `mac-enabler`：共通Codex設定、管理ブロック、同期スクリプト、同期Workflowの正本
+- `dev-template`：Issue／PR／Project自動化を含む新規リポジトリ用テンプレート
+- 各プロジェクトrepo：プロジェクト固有の設計、ブランチ、テスト、データの正本
+
+`dev-template`のGitHub自動化ロジックを`mac-enabler`へ重複コピーせず、`dev-template`自体もmac-enablerの同期対象として管理します。
+
 ## 構成
 
 ```text
 mac-enabler/
+├── .github/
+│   ├── sync-targets.json
+│   └── workflows/
+│       └── sync-targets.yml
 ├── AGENTS.md
 ├── config/
 │   ├── model-routing.json
@@ -37,6 +50,7 @@ mac-enabler/
 ├── scripts/
 │   ├── route-task.mjs
 │   ├── sync-agents.mjs
+│   ├── sync-repositories.mjs
 │   └── validate.mjs
 ├── templates/
 │   ├── project-profile.example.json
@@ -86,7 +100,24 @@ node scripts/sync-agents.mjs --target ../manga-mac --check
 
 同期スクリプトは、対象リポジトリの既存 `AGENTS.md` を保持したまま管理ブロックだけを追加・更新します。配下の `AGENTS.md` は削除・上書きしません。
 
-### 3. 通常の作業順
+### 3. 自動同期
+
+`main`へ共通設定をマージすると、`.github/sync-targets.json`に登録された対象repoへ同期Workflowが走ります。
+
+Workflowは次を行います。
+
+1. 対象repoの指定ベースブランチをcloneする
+2. `sync-agents.mjs`で共通ブロックとスナップショットを更新する
+3. `chore/sync-mac-enabler`ブランチへpushする
+4. 既存PRがあれば更新し、なければ新規PRを作る
+
+対象repoの一覧とベースブランチは`.github/sync-targets.json`で中央管理します。現在は`dev-template`と`manga-mac`を登録しています。
+
+Workflowには、対象repoへpushとPR作成ができる`MAC_ENABLER_SYNC_TOKEN`というRepository secretが必要です。private repoを含める場合は、両方の対象repoへアクセスできるFine-grained tokenを登録します。Tokenが未登録の状態ではWorkflowは意図的に失敗し、同期済みとは扱いません。
+
+手動確認はGitHub Actionsの`Sync mac-enabler consumers`から、対象repo指定または`dry_run`で実行できます。
+
+### 4. 通常の作業順
 
 1. タスクを分類し、ルートとモデルプロファイルを決める
 2. Issue／PR、対象ブランチ、受入条件を確認する
