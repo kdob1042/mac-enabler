@@ -6,8 +6,6 @@ on:
     paths:
       - ".github/sync-targets.json"
       - ".github/workflows/sync-targets.yml"
-      - "config/**"
-      - "docs/compact-protocol.md"
       - "scripts/sync-agents.mjs"
       - "scripts/sync-repositories.mjs"
       - "templates/shared-agents-block.md"
