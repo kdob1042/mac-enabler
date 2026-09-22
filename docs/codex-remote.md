@@ -112,3 +112,26 @@ npm run mac:bootstrap -- --install --force
 ```
 
 Codex自体やRemoteが落ちている場合、mac-enablerはOSレベルの遠隔ログインを代替しない。必要になった時点でTailscale/SSHを非常用経路として追加する。
+
+## GitHub ActionsをMacへ逃がす
+
+private repositoryのGitHub-hosted runnerが利用制限・予算・platform側のrunner allocationで止まる場合、Macをself-hosted runnerとして使える。
+
+```bash
+npm run actions:runner -- --install
+npm run actions:runner -- --check
+```
+
+セットアップは次を行う。
+
+- GitHub公式の最新Actions runnerを取得
+- releaseにsha256 digestがあれば検証
+- `kdob1042/mac-enabler` のrepository runnerとして登録
+- custom label `mac-enabler-ci` を付与
+- macOSの `svc.sh` でlaunchd service化
+- repository variable `MAC_ENABLER_CI_RUNNER=mac-enabler-ci` を設定
+- validation workflowをself-hosted runnerへ切替
+
+runner registration tokenは実行時に `gh api` で取得し、repoや設定ファイルへ保存しない。
+
+CI workflowはfork由来PRをself-hosted Macで実行しない。通常の同一repo PRとmain pushだけを対象にする。
