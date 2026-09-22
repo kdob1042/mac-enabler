@@ -9,6 +9,9 @@
     "test": "node --test",
     "codex:profiles": "node scripts/install-codex-profiles.mjs",
     "codex:setup": "node scripts/setup-codex.mjs",
-    "cursor:setup": "node scripts/setup-cursor.mjs"
+    "cursor:setup": "node scripts/setup-cursor.mjs",
+    "mac:bootstrap": "node scripts/bootstrap-mac.mjs",
+    "codex:user-agents": "node scripts/install-user-agents.mjs",
+    "doctor": "node scripts/doctor.mjs"
   }
 }
