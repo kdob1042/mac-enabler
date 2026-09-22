@@ -70,6 +70,9 @@ mac-enabler/
 ```bash
 npm run mac:bootstrap -- --install
 npm run doctor
+
+# Macをprivate GitHub Actions runnerとして使う場合
+npm run actions:runner -- --install
 ```
 
 この入口で `~/.codex/` に導入するのは、2つのCodexプロフィールとユーザー `AGENTS.md` の管理ブロックです。認証、履歴、ログ、キャッシュ、既存 `config.toml` 全体は上書きしません。
@@ -199,6 +202,19 @@ Workflowには対象repoへpushとPR作成ができる `MAC_ENABLER_SYNC_TOKEN` 
 5. 難しい設計・実装はAstra、簡単な実装はLunaで行う
 6. 変更範囲を満たす最小の検証を行う
 7. 未実行の検証と理由をIssue／PRへ残す
+
+## GitHub Actions
+
+`mac-enabler` のCIは、PRとmain pushだけで実行します。feature branchのpushとPRで二重実行しません。新しいcommitが来た場合は古い同一PRのvalidationをcancelします。
+
+通常は軽量な `ubuntu-slim` を使います。Mac miniをself-hosted runnerとして登録すると、セットアップスクリプトがrepository variable `MAC_ENABLER_CI_RUNNER=mac-enabler-ci` を設定し、workflow編集なしでMac runnerへ切り替えます。
+
+```bash
+npm run actions:runner -- --install
+npm run actions:runner -- --check
+```
+
+GitHub-hosted runnerへ戻す場合はGitHubのrepository variable `MAC_ENABLER_CI_RUNNER` を削除します。self-hosted Macではfork由来PRを実行しない条件をworkflow側に入れています。
 
 ## Codex Remote / スマホ運用
 
