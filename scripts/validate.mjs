@@ -18,6 +18,7 @@ const workflow = await readJson('config/workflow.json');
 const syncTargets = await readJson('.github/sync-targets.json');
 const cursorConfig = await readJson('runtime/cursor/cli-config.json');
 const template = await readFile(path.join(ROOT, 'templates', 'shared-agents-block.md'), 'utf8');
+const userTemplate = await readFile(path.join(ROOT, 'templates', 'user-agents-block.md'), 'utf8');
 
 assert(routing.version === 1, 'Unexpected routing version.');
 assert(workflow.version === 1, 'Unexpected workflow version.');
@@ -53,10 +54,20 @@ for (const route of routing.routes) {
 }
 for (const [profile, binding] of Object.entries(routing.bindings)) {
   assert(binding.cli_profile && binding.model && binding.reasoning_effort, 'Incomplete binding: ' + profile);
-  await stat(path.join(ROOT, 'runtime', 'profiles', binding.cli_profile + '.config.toml'));
+  const profilePath = path.join(ROOT, 'runtime', 'profiles', binding.cli_profile + '.config.toml');
+  await stat(profilePath);
+  const profileConfig = await readFile(profilePath, 'utf8');
+  assert(profileConfig.includes('approval_policy = "on-request"'), 'Profile must use on-request approvals: ' + profile);
+  assert(profileConfig.includes('sandbox_mode = "workspace-write"'), 'Profile must use workspace-write sandbox: ' + profile);
+  assert(profileConfig.includes('approvals_reviewer = "auto_review"'), 'Profile must enable auto review: ' + profile);
+  assert(profileConfig.includes('network_access = true'), 'Profile must enable workspace network access: ' + profile);
 }
 assert(template.includes('<!-- MAC-ENABLER:BEGIN -->'), 'Missing managed block start.');
 assert(template.includes('<!-- MAC-ENABLER:END -->'), 'Missing managed block end.');
+assert(userTemplate.includes('<!-- MAC-ENABLER-USER:BEGIN -->'), 'Missing user managed block start.');
+assert(userTemplate.includes('<!-- MAC-ENABLER-USER:END -->'), 'Missing user managed block end.');
+assert(userTemplate.includes('do not stop after only analysis'), 'User workflow must require implementation/verification when possible.');
+assert(userTemplate.includes('without explicit user authorization'), 'User workflow must preserve irreversible-action approval.');
 assert(workflow.compact_protocol.required_packet_fields.includes('next_action'), 'Missing next_action field.');
 assert(routing.bindings.astra_light.cli_profile === 'astra_light', 'Astra Light binding failed.');
 assert(routing.bindings.luna_max.cli_profile === 'luna_max', 'Luna Max binding failed.');
