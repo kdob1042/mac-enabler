@@ -50,7 +50,10 @@ mac-enabler/
 │       ├── astra_light.config.toml
 │       └── luna_max.config.toml
 ├── scripts/
+│   ├── bootstrap-mac.mjs
+│   ├── doctor.mjs
 │   ├── install-codex-profiles.mjs
+│   ├── install-user-agents.mjs
 │   ├── route-task.mjs
 │   ├── setup-codex.mjs
 │   ├── setup-cursor.mjs
@@ -59,6 +62,22 @@ mac-enabler/
 │   └── validate.mjs
 └── test/
 ```
+
+## Mac到着時の初期セットアップ
+
+新しいMacでは、mac-enablerをcloneしたあと次を実行します。
+
+```bash
+npm run mac:bootstrap -- --install
+npm run doctor
+
+# Macをprivate GitHub Actions runnerとして使う場合
+npm run actions:runner -- --install
+```
+
+この入口で `~/.codex/` に導入するのは、2つのCodexプロフィールとユーザー `AGENTS.md` の管理ブロックです。認証、履歴、ログ、キャッシュ、既存 `config.toml` 全体は上書きしません。
+
+詳細とCodex Remoteの手順は `docs/codex-remote.md` を参照してください。RemoteのQRペアリングやアカウント状態はリポジトリから自動変更しません。
 
 ## 端末側のCodex設定
 
@@ -69,18 +88,12 @@ mac-enabler/
 | `luna_max` | Luna Max | `gpt-5.6-luna` / `xhigh` | 既存ソース解析、変更箇所の特定、簡単な実装 |
 | `astra_light` | Astra Light | `gpt-6-astra` / `low` | 難しい設計、難しい実装、重大なリスク |
 
-### Codexが実行するセットアップ
+### Codexプロフィールだけを更新する場合
 
-`mac-enabler`をcloneしたあと、Codex自身に次のスクリプトを実行させれば、端末側のプロフィールを取り込めます。
+通常の初期導入は `npm run mac:bootstrap -- --install` を使います。プロフィールだけを個別に更新・確認する場合は従来のコマンドも使えます。
 
 ```bash
-cd <mac-enabler-dir>
 npm run codex:setup -- --install
-```
-
-確認だけ行う場合：
-
-```bash
 npm run codex:setup -- --check
 ```
 
@@ -99,7 +112,9 @@ codex --profile luna_max
 
 `--force`を付けた場合だけ既存の同名プロフィールを置き換え、置換前にバックアップを作成します。`config.toml`、認証、履歴、ログ、キャッシュはこのスクリプトでは変更しません。
 
-承認、sandbox、サブエージェント上限などの共通デフォルトを反映する場合は、`runtime/base-config.snippet.toml` の内容を利用端末の `~/.codex/config.toml` へ、既存設定を確認しながら手動で統合します。セットアップスクリプトは既存設定の破壊を避けるため、そこへ自動追記しません。
+承認とsandboxの自走向け既定値は各プロフィールファイル自体に含めます。両プロフィールとも `workspace-write`、`on-request`、自動承認レビュー、workspace内ネットワークアクセスを使います。これにより通常のsandbox境界を残しつつ、日常的な承認待ちを減らします。
+
+`runtime/base-config.snippet.toml` は、同じ既定値をプロフィール外でも使いたい場合の参照用です。セットアップスクリプトは既存設定の破壊を避けるため、`~/.codex/config.toml` へ自動追記しません。
 
 このセットアップは端末側のCodex用です。Cursorのモデル選択やCursor固有の設定を、このrepoから自動変更するものではありません。
 
@@ -188,9 +203,29 @@ Workflowには対象repoへpushとPR作成ができる `MAC_ENABLER_SYNC_TOKEN` 
 6. 変更範囲を満たす最小の検証を行う
 7. 未実行の検証と理由をIssue／PRへ残す
 
+## GitHub Actions
+
+`mac-enabler` のCIは、PRとmain pushだけで実行します。feature branchのpushとPRで二重実行しません。新しいcommitが来た場合は古い同一PRのvalidationをcancelします。
+
+通常は軽量な `ubuntu-slim` を使います。Mac miniをself-hosted runnerとして登録すると、セットアップスクリプトがrepository variable `MAC_ENABLER_CI_RUNNER=mac-enabler-ci` を設定し、workflow編集なしでMac runnerへ切り替えます。
+
+```bash
+npm run actions:runner -- --install
+npm run actions:runner -- --check
+```
+
+GitHub-hosted runnerへ戻す場合はGitHubのrepository variable `MAC_ENABLER_CI_RUNNER` を削除します。self-hosted Macではfork由来PRを実行しない条件をworkflow側に入れています。
+
+## Codex Remote / スマホ運用
+
+Mac上でCodexを起動し、Codexアプリ側でRemoteを有効化してChatGPTモバイルアプリとQRペアリングします。スマホ側は、スレッド開始・継続、方向修正、承認、diff・terminal・test結果の確認に使います。
+
+Macは起動・オンライン・Codex実行状態である必要があります。詳細は `docs/codex-remote.md` を参照してください。
+
 ## 検証
 
 ```bash
 npm test
 npm run validate
+npm run doctor
 ```

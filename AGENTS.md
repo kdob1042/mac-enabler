@@ -9,8 +9,9 @@
 3. `config/workflow.json`
 4. 必要に応じて `docs/compact-protocol.md` と `docs/integration.md`
 5. Cursor／Codex併用の変更では `docs/cursor-codex.md`
+6. Mac初期導入・Codex Remote・長時間自走の変更では `docs/codex-remote.md`
 
-端末側のCodexプロファイルを導入・確認するときは、READMEに記載した `npm run codex:setup` を使う。`~/.codex/config.toml`、認証、履歴、ログ、キャッシュを直接上書きしない。
+Mac初期導入では `npm run mac:bootstrap -- --install` を入口にし、Codexプロファイルとユーザー `AGENTS.md` の管理ブロックを導入する。プロフィールだけを扱う既存用途では `npm run codex:setup` を使う。`~/.codex/config.toml`、認証、履歴、ログ、キャッシュを直接上書きしない。
 Cursor CLIの端末設定を導入・確認するときは、READMEに記載した `npm run cursor:setup` を使う。`~/.cursor/cli-config.json` の未管理設定・認証・履歴・キャッシュを直接上書きしない。
 
 ## 変更ルール

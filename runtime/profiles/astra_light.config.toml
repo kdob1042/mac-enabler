@@ -3,3 +3,11 @@
 # Use for difficult design and difficult implementation.
 model = "gpt-6-astra"
 model_reasoning_effort = "low"
+
+# Keep the standard workspace boundary, but avoid routine approval stalls.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+approvals_reviewer = "auto_review"
+
+[sandbox_workspace_write]
+network_access = true
