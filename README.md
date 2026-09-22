@@ -11,7 +11,7 @@ cloneしたこのディレクトリで、使うCLIだけを設定します。
 | 確認 | `npm run codex:setup -- --check` | `npm run cursor:setup -- --check` |
 | 導入 | `npm run codex:setup -- --install` | `npm run cursor:setup -- --install` |
 
-既存の管理値を置き換える場合だけ `--force` を追加します。置換前にバックアップを作り、未管理設定・認証・履歴・ログ・キャッシュは保持します。導入先はCodexの `--codex-home PATH` / `CODEX_HOME`、Cursorの `--cursor-config-dir PATH` / `CURSOR_CONFIG_DIR` で指定できます。
+既存の管理値を置き換える場合だけ `--force` を追加します。Codexは同名プロフィール全体を、Cursorは管理項目だけを更新します。事前にバックアップを作り、その他の設定・認証・履歴・ログ・キャッシュは保持します。導入先はCodexの `--codex-home PATH` / `CODEX_HOME`、Cursorの `--cursor-config-dir PATH` / `CURSOR_CONFIG_DIR` で指定できます。
 
 Codexの導入対象は `runtime/profiles/` の2ファイルです。`~/.codex/config.toml`は変更しません。共通デフォルトが必要なら `runtime/base-config.snippet.toml` を既存設定に確認しながら統合します。Cursorは `~/.cursor/cli-config.json` の管理項目だけを更新し、ログイン・IDE・Cloud Agent・Grok Botの設定は変更しません。
 
@@ -52,7 +52,7 @@ node scripts/route-task.mjs --phase implementation --task "難しい実装を行
 | 新規repoのIssue／PR／Project自動化 | `dev-template` |
 | 作業の現在地 | 対象repoのIssue／PR |
 
-このrepoを置くだけでは他のrepoへ設定は適用されません。端末とCloud Agentの認証・会話・課金枠も別です。
+このrepoを置くだけでは他のrepoへ設定は適用されません。認証・会話・課金枠がホスト間で自動共有されたとは仮定しません。
 
 ## 必要な手順を読む
 
