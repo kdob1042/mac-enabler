@@ -19,6 +19,7 @@ const syncTargets = await readJson('.github/sync-targets.json');
 const cursorConfig = await readJson('runtime/cursor/cli-config.json');
 const template = await readFile(path.join(ROOT, 'templates', 'shared-agents-block.md'), 'utf8');
 const userTemplate = await readFile(path.join(ROOT, 'templates', 'user-agents-block.md'), 'utf8');
+const validateWorkflow = await readFile(path.join(ROOT, '.github', 'workflows', 'validate.yml'), 'utf8');
 
 assert(routing.version === 1, 'Unexpected routing version.');
 assert(workflow.version === 1, 'Unexpected workflow version.');
@@ -68,6 +69,11 @@ assert(userTemplate.includes('<!-- MAC-ENABLER-USER:BEGIN -->'), 'Missing user m
 assert(userTemplate.includes('<!-- MAC-ENABLER-USER:END -->'), 'Missing user managed block end.');
 assert(userTemplate.includes('do not stop after only analysis'), 'User workflow must require implementation/verification when possible.');
 assert(userTemplate.includes('without explicit user authorization'), 'User workflow must preserve irreversible-action approval.');
+assert(validateWorkflow.includes("vars.MAC_ENABLER_CI_RUNNER || 'ubuntu-slim'"), 'Validation workflow must support runner override with slim hosted fallback.');
+assert(validateWorkflow.includes('cancel-in-progress: true'), 'Validation workflow must cancel stale runs.');
+assert(validateWorkflow.includes('timeout-minutes: 10'), 'Validation workflow must have a bounded timeout.');
+assert(!validateWorkflow.includes('- "feat/**"'), 'Validation workflow must not duplicate PR CI with feature-branch push CI.');
+assert(validateWorkflow.includes("github.event.pull_request.head.repo.full_name == github.repository"), 'Self-hosted CI must not execute fork PR code.');
 assert(workflow.compact_protocol.required_packet_fields.includes('next_action'), 'Missing next_action field.');
 assert(routing.bindings.astra_light.cli_profile === 'astra_light', 'Astra Light binding failed.');
 assert(routing.bindings.luna_max.cli_profile === 'luna_max', 'Luna Max binding failed.');
