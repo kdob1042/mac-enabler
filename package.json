@@ -12,6 +12,7 @@
     "cursor:setup": "node scripts/setup-cursor.mjs",
     "mac:bootstrap": "node scripts/bootstrap-mac.mjs",
     "codex:user-agents": "node scripts/install-user-agents.mjs",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "actions:runner": "node scripts/setup-actions-runner.mjs"
   }
 }
