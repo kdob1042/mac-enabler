@@ -13,13 +13,16 @@
 
 ## 端末側のCodexセットアップ
 
-端末で `mac-enabler` をcloneしたら、Codexはリポジトリ内のセットアップスクリプトを実行できます。
+端末で `mac-enabler` をcloneしたら、初期導入は次を使います。
 
 ```bash
-npm run codex:setup -- --install
+npm run mac:bootstrap -- --install
+npm run doctor
 ```
 
-このスクリプトが `~/.codex/` に導入するのは `luna_max` と `astra_light` の2プロフィールだけです。既存の `config.toml`、認証、履歴、ログ、キャッシュは変更しません。
+この入口は `luna_max` と `astra_light` の2プロフィールに加え、`~/.codex/AGENTS.md` のmac-enabler管理ブロックを導入します。既存の `config.toml`、認証、履歴、ログ、キャッシュは変更しません。既存AGENTS本文があれば保持し、更新前にバックアップします。
+
+プロフィールだけを扱う場合は `npm run codex:setup` を引き続き利用できます。
 
 通常は `luna_max` で既存ソースを解析して変更箇所を特定し、コンパクション後に難しい設計・実装だけ `astra_light` へ切り替えます。簡単な実装はそのまま `luna_max` で進めます。
 
@@ -107,3 +110,9 @@ Cloud Agentは対象repo自身の `AGENTS.md`、セットアップ設定、docs�
 ## 更新
 
 mac-enablerの共通ブロックを変更した場合、許可リストにある対象repoへ同期PRを作ります。対象repoを許可リストへ追加しない限り、そのrepoへは同期されません。
+
+## Codex Remote
+
+Remoteは端末ファイルの同期方式ではありません。Mac上で動くCodexをホストとして、ChatGPTモバイルアプリから進行中の作業を確認・操作します。QRペアリングやRemoteの有効化はCodexアプリ側で行い、mac-enablerはアカウント設定を自動変更しません。
+
+自走ルール、復旧手順、Remoteの運用詳細は `docs/codex-remote.md` を正本とします。
