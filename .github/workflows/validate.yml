@@ -12,7 +12,13 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-slim
+    # Default to GitHub-hosted. Mac setup switches this repo variable to
+    # "mac-enabler-ci", a private self-hosted runner label.
+    runs-on: ${{ vars.MAC_ENABLER_CI_RUNNER || 'ubuntu-latest' }}
+
+    # Never execute fork PR code on the private self-hosted Mac.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
